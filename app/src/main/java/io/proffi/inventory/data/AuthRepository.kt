@@ -13,7 +13,7 @@ class AuthRepository(
     suspend fun login(email: String, password: String): Result<LoginResponse> {
         return try {
             val response = apiService.login(LoginRequest(email, password))
-            tokenManager.saveTokens(response.access_token, response.refresh_token)
+            tokenManager.saveTokens(response.accessToken, response.refreshToken)
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
@@ -26,7 +26,7 @@ class AuthRepository(
                 ?: return Result.failure(Exception("No refresh token available"))
 
             val response = apiService.refreshToken(RefreshTokenRequest(refreshToken))
-            tokenManager.saveTokens(response.access_token, response.refresh_token)
+            tokenManager.saveTokens(response.accessToken, response.refreshToken)
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)

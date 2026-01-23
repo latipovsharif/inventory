@@ -15,6 +15,9 @@ val appModule = module {
     // TokenManager
     single { TokenManager(androidContext()) }
 
+    // LanguageManager
+    single { LanguageManager(androidContext()) }
+
     // Network
     single { AuthInterceptor(get()) }
     single { RetrofitClient.create(get()) }

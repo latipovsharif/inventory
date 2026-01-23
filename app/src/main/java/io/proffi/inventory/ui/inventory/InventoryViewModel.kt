@@ -3,6 +3,7 @@ package io.proffi.inventory.ui.inventory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.proffi.inventory.data.AuthRepository
+import io.proffi.inventory.data.InventoryConflictException
 import io.proffi.inventory.data.InventoryRepository
 import io.proffi.inventory.network.Inventory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,9 +49,12 @@ class InventoryViewModel(
                 _currentInventoryId.value = inventoryId
                 _startInventoryState.value = StartInventoryState.Success(inventoryId)
             } else {
-                _startInventoryState.value = StartInventoryState.Error(
-                    result.exceptionOrNull()?.message ?: "Unknown error"
-                )
+                val exception = result.exceptionOrNull()
+                _startInventoryState.value = if (exception is InventoryConflictException) {
+                    StartInventoryState.Conflict(exception.message ?: "Существует не закрытая инвентаризация")
+                } else {
+                    StartInventoryState.Error(exception?.message ?: "Unknown error")
+                }
             }
         }
     }
@@ -91,5 +95,6 @@ sealed class StartInventoryState {
     object Empty : StartInventoryState()
     object Loading : StartInventoryState()
     data class Success(val inventoryId: String) : StartInventoryState()
+    data class Conflict(val message: String) : StartInventoryState()
     data class Error(val message: String) : StartInventoryState()
 }

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Основная буква P (темная часть с градиентом) -->
+    <group>
+        <!-- Верхняя часть P -->
+        <path
+            android:fillColor="#3A3A3A"
+            android:pathData="M50,30 L50,170 L70,170 L70,110 L110,110 Q140,110 145,85 Q150,60 145,45 Q140,30 110,30 Z M70,50 L105,50 Q120,50 123,60 Q126,70 123,80 Q120,90 105,90 L70,90 Z" />
+
+        <!-- Светлая грань P (3D эффект) -->
+        <path
+            android:fillColor="#5A5A5A"
+            android:pathData="M50,30 L55,25 L115,25 Q145,25 150,45 Q155,60 150,85 Q145,105 115,105 L75,105 L75,165 L70,170 L70,110 L110,110 Q140,110 145,85 Q150,60 145,45 Q140,30 110,30 Z" />
+    </group>
+
+    <!-- Зеленые столбики (градиент от темного к светлому) -->
+    <!-- Столбик 1 (самый темный) -->
+    <group>
+        <path
+            android:fillColor="#26A69A"
+            android:pathData="M60,120 L80,120 L80,175 L60,175 Z" />
+        <path
+            android:fillColor="#4DB6AC"
+            android:pathData="M60,120 L65,115 L85,115 L80,120 Z" />
+        <path
+            android:fillColor="#1A8F84"
+            android:pathData="M80,120 L85,115 L85,170 L80,175 Z" />
+    </group>
+
+    <!-- Столбик 2 (средний) -->
+    <group>
+        <path
+            android:fillColor="#4DB6AC"
+            android:pathData="M90,100 L110,100 L110,175 L90,175 Z" />
+        <path
+            android:fillColor="#80CBC4"
+            android:pathData="M90,100 L95,95 L115,95 L110,100 Z" />
+        <path
+            android:fillColor="#26A69A"
+            android:pathData="M110,100 L115,95 L115,170 L110,175 Z" />
+    </group>
+
+    <!-- Столбик 3 (самый светлый) -->
+    <group>
+        <path
+            android:fillColor="#80CBC4"
+            android:pathData="M120,80 L140,80 L140,175 L120,175 Z" />
+        <path
+            android:fillColor="#B2DFDB"
+            android:pathData="M120,80 L125,75 L145,75 L140,80 Z" />
+        <path
+            android:fillColor="#4DB6AC"
+            android:pathData="M140,80 L145,75 L145,170 L140,175 Z" />
+    </group>
+</vector>

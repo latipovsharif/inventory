@@ -1,6 +1,7 @@
 package io.proffi.inventory.network
 
 
+import com.google.gson.annotations.SerializedName
 import retrofit2.http.*
 
 interface ApiService {
@@ -13,14 +14,23 @@ interface ApiService {
     @GET("api/v1/warehouses/warehouse")
     suspend fun getWarehouses(): WarehousesResponse
 
-    @GET("/api/v1/warehouses/inventory")
-    suspend fun getOpenInventories(@Query("warehouseId") warehouseId: String): List<Inventory>
+    @GET("api/v1/warehouses/inventory")
+    suspend fun getOpenInventories(@Query("warehouse_id") warehouseId: String): InventoryListResponse
 
-    @POST("api/inventories/start")
+    @GET("api/v1/warehouses/inventory/{id}/details")
+    suspend fun getInventoryItemDetails(
+        @Path("id") inventoryId: String,
+        @Query("barcode") barcode: String
+    ): InventoryItemDetailsResponse
+
+    @POST("/api/v1/warehouses/inventory")
     suspend fun startInventory(@Body request: StartInventoryRequest): StartInventoryResponse
 
-    @POST("api/inventories/scan")
-    suspend fun scanBarcode(@Body request: ScanBarcodeRequest): ScanBarcodeResponse
+    @POST("api/v1/warehouses/inventory/{id}/scan")
+    suspend fun scanBarcode(@Path("id") inventoryId: String, @Body request: ScanBarcodeRequest): ScanBarcodeResponse
+
+    @PUT("api/v1/warehouses/inventory/{id}/update")
+    suspend fun updateInventoryItem(@Path("id") inventoryId: String, @Body request: List<UpdateInventoryItemRequest>): UpdateInventoryItemResponse
 
     @POST("api/inventories/{id}/close")
     suspend fun closeInventory(@Path("id") inventoryId: String): CloseInventoryResponse
@@ -33,12 +43,16 @@ data class LoginRequest(
 )
 
 data class LoginResponse(
-    val access_token: String,
-    val refresh_token: String,
-    val expires_in: Int,
+    @SerializedName("access_token")
+    val accessToken: String,
+    @SerializedName("refresh_token")
+    val refreshToken: String,
+    @SerializedName("expires_in")
+    val expiresIn: Int,
     val message: String,
     val status: Int,
-    val token_type: String,
+    @SerializedName("token_type")
+    val tokenType: String,
     val user: User
 )
 
@@ -48,14 +62,18 @@ data class User(
 )
 
 data class RefreshTokenRequest(
+    @SerializedName("refresh_token")
     val refreshToken: String
 )
 
 // Warehouse models
 data class WarehousesResponse(
-    val page_count: Int,
-    val total_items: Int,
-    val item_per_page: Int,
+    @SerializedName("page_count")
+    val pageCount: Int,
+    @SerializedName("total_items")
+    val totalItems: Int,
+    @SerializedName("item_per_page")
+    val itemPerPage: Int,
     val body: List<Warehouse>
 )
 
@@ -76,8 +94,10 @@ data class Store(
 data class Address(
     val id: String,
     val country: Country,
-    val address_string: String,
-    val zip_code: String?
+    @SerializedName("address_string")
+    val addressString: String,
+    @SerializedName("zip_code")
+    val zipCode: String?
 )
 
 data class Country(
@@ -97,29 +117,136 @@ data class InventoryBody(
     val id: String
 )
 
-data class Inventory(
-    val id: String,
-    val warehouseId: String,
-    val warehouseName: String?,
-    val startedAt: String,
-    val status: String
+data class InventoryListResponse(
+    @SerializedName("page_count")
+    val pageCount: Int,
+    @SerializedName("total_items")
+    val totalItems: Int,
+    @SerializedName("item_per_page")
+    val itemPerPage: Int,
+    val body: List<Inventory>
 )
 
+data class Inventory(
+    val id: String,
+    val warehouse: WarehouseInfo,
+    @SerializedName("start_date")
+    val startDate: String,
+    @SerializedName("end_date")
+    val endDate: String?,
+    val status: String,
+    @SerializedName("created_by")
+    val createdBy: UserInfo,
+    @SerializedName("created_at")
+    val createdAt: String
+)
+
+data class WarehouseInfo(
+    val id: String,
+    val name: String
+)
+
+data class UserInfo(
+    val id: String,
+    @SerializedName("first_name")
+    val firstName: String,
+    @SerializedName("last_name")
+    val lastName: String,
+    val email: String
+)
+
+// Inventory item details models
+data class InventoryItemDetailsResponse(
+    @SerializedName("page_count")
+    val pageCount: Int,
+    @SerializedName("total_items")
+    val totalItems: Int,
+    @SerializedName("item_per_page")
+    val itemPerPage: Int,
+    val body: List<InventoryItemDetail>
+)
+
+data class InventoryItemDetail(
+    val id: String,
+    val inventory: String?,
+    val product: ProductDetail,
+    @SerializedName("expected_quantity")
+    val expectedQuantity: Double,
+    @SerializedName("actual_quantity")
+    val actualQuantity: Double,
+    val difference: Double
+)
+
+data class ProductDetail(
+    val id: String,
+    val name: String,
+    val barcode: String,
+    val article: String,
+    val origin: String?,
+    val description: String?,
+    val size: String?,
+    val state: String?,
+    val category: CategoryDetail?,
+    @SerializedName("product_group")
+    val productGroup: String?,
+    val images: String?
+)
+
+data class CategoryDetail(
+    val id: String,
+    val code: String,
+    val name: String,
+    val parent: String?,
+    val children: String?,
+    val image: String?,
+    @SerializedName("show_on_cash")
+    val showOnCash: Boolean
+)
+
+
 data class StartInventoryRequest(
-    val warehouse_id: String,
-    val start_date: String  // Формат ISO 8601: "2026-01-15T10:30:00Z"
+    @SerializedName("warehouse_id")
+    val warehouseId: String,
+    @SerializedName("start_date")
+    val startDate: String  // Формат ISO 8601: "2026-01-15T10:30:00Z"
 )
 
 data class ScanBarcodeRequest(
-    val inventoryId: String,
     val barcode: String,
-    val quantity: Int
+    val quantity: Double  // Изменено с Int на Double для поддержки дробных значений
 )
 
 data class ScanBarcodeResponse(
-    val success: Boolean,
-    val message: String?,
-    val productName: String?
+    val status: Int,
+    val message: String,
+    val body: ScanBarcodeBody
+)
+
+data class ScanBarcodeBody(
+    val barcode: String,
+    val message: String,
+    val quantity: Double
+)
+
+data class UpdateInventoryItemRequest(
+    @SerializedName("product_id")
+    val productId: String,
+    @SerializedName("actual_quantity")
+    val actualQuantity: Double,
+    @SerializedName("previous_actual_quantity")
+    val previousActualQuantity: Double
+)
+
+data class UpdateInventoryItemResponse(
+    val status: Int,
+    val message: String,
+    val body: UpdateInventoryItemBody
+)
+
+data class UpdateInventoryItemBody(
+    val barcode: String,
+    val message: String,
+    val quantity: Double
 )
 
 data class CloseInventoryResponse(

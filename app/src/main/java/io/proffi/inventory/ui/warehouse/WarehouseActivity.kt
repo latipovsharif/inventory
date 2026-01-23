@@ -1,7 +1,6 @@
 package io.proffi.inventory.ui.warehouse
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,17 +8,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.proffi.inventory.R
 import io.proffi.inventory.network.Warehouse
+import io.proffi.inventory.ui.base.BaseActivity
 import io.proffi.inventory.ui.inventory.InventoryActivity
 import io.proffi.inventory.ui.login.LoginActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class WarehouseActivity : ComponentActivity() {
+class WarehouseActivity : BaseActivity() {
 
     private val viewModel: WarehouseViewModel by viewModel()
 
@@ -37,6 +40,9 @@ class WarehouseActivity : ComponentActivity() {
                             }
                         )
                     },
+                    onBackPressed = {
+                        finish()
+                    },
                     onLogout = {
                         startActivity(android.content.Intent(this, LoginActivity::class.java))
                         finish()
@@ -51,6 +57,7 @@ class WarehouseActivity : ComponentActivity() {
 fun WarehouseScreen(
     viewModel: WarehouseViewModel,
     onWarehouseSelected: (Warehouse) -> Unit,
+    onBackPressed: () -> Unit,
     onLogout: () -> Unit
 ) {
     val warehousesState by viewModel.warehousesState.collectAsState()
@@ -58,13 +65,18 @@ fun WarehouseScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Выбор склада") },
+                title = { Text(stringResource(R.string.warehouse_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         viewModel.logout()
                         onLogout()
                     }) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Выйти")
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = stringResource(R.string.cd_logout))
                     }
                 }
             )
@@ -84,7 +96,7 @@ fun WarehouseScreen(
                 is WarehousesState.Success -> {
                     if (state.warehouses.isEmpty()) {
                         Text(
-                            text = "Нет доступных складов",
+                            text = stringResource(R.string.warehouse_empty),
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .padding(16.dp),
@@ -112,13 +124,13 @@ fun WarehouseScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Ошибка: ${state.message}",
+                            text = stringResource(R.string.warehouse_error, state.message),
                             color = MaterialTheme.colors.error,
                             style = MaterialTheme.typography.body1
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.loadWarehouses() }) {
-                            Text("Повторить")
+                            Text(stringResource(R.string.warehouse_retry))
                         }
                     }
                 }
@@ -152,10 +164,10 @@ fun WarehouseItem(
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.primary
             )
-            if (warehouse.address.address_string.isNotBlank()) {
+            if (warehouse.address.addressString.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${warehouse.address.address_string}, ${warehouse.address.country.name}",
+                    text = "${warehouse.address.addressString}, ${warehouse.address.country.name}",
                     style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                 )
@@ -163,3 +175,4 @@ fun WarehouseItem(
         }
     }
 }
+

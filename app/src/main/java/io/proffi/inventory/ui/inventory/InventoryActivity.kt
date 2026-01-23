@@ -1,7 +1,6 @@
 package io.proffi.inventory.ui.inventory
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,16 +8,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.proffi.inventory.R
 import io.proffi.inventory.network.Inventory
+import io.proffi.inventory.ui.base.BaseActivity
 import io.proffi.inventory.ui.scanner.ScannerActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class InventoryActivity : ComponentActivity() {
+class InventoryActivity : BaseActivity() {
 
     private val viewModel: InventoryViewModel by viewModel()
 
@@ -61,15 +63,26 @@ fun InventoryScreen(
     val startInventoryState by viewModel.startInventoryState.collectAsState()
     val currentInventoryId by viewModel.currentInventoryId.collectAsState()
 
+    // State для управления диалоговым окном
+    var showConflictDialog by remember { mutableStateOf(false) }
+    var conflictMessage by remember { mutableStateOf("") }
+
     LaunchedEffect(warehouseId) {
         viewModel.loadOpenInventories(warehouseId)
     }
 
     LaunchedEffect(startInventoryState) {
-        if (startInventoryState is StartInventoryState.Success) {
-            val inventoryId = (startInventoryState as StartInventoryState.Success).inventoryId
-            onInventoryStarted(inventoryId)
-            viewModel.resetStartInventoryState()
+        when (startInventoryState) {
+            is StartInventoryState.Success -> {
+                val inventoryId = (startInventoryState as StartInventoryState.Success).inventoryId
+                onInventoryStarted(inventoryId)
+                viewModel.resetStartInventoryState()
+            }
+            is StartInventoryState.Conflict -> {
+                conflictMessage = (startInventoryState as StartInventoryState.Conflict).message
+                showConflictDialog = true
+            }
+            else -> {}
         }
     }
 
@@ -79,13 +92,39 @@ fun InventoryScreen(
         }
     }
 
+    // Диалоговое окно для конфликта инвентаризации
+    if (showConflictDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showConflictDialog = false
+                viewModel.resetStartInventoryState()
+            },
+            title = {
+                Text(text = stringResource(R.string.inventory_conflict_dialog_title))
+            },
+            text = {
+                Text(text = conflictMessage)
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showConflictDialog = false
+                        viewModel.resetStartInventoryState()
+                    }
+                ) {
+                    Text(stringResource(R.string.inventory_conflict_ok))
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(warehouseName) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -98,7 +137,7 @@ fun InventoryScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Управление инвентаризацией",
+                text = stringResource(R.string.inventory_management_title),
                 style = MaterialTheme.typography.h5,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -116,13 +155,13 @@ fun InventoryScreen(
                         color = MaterialTheme.colors.onPrimary
                     )
                 } else {
-                    Text("Начать новую инвентаризацию")
+                    Text(stringResource(R.string.inventory_start_new))
                 }
             }
 
             if (startInventoryState is StartInventoryState.Error) {
                 Text(
-                    text = "Ошибка: ${(startInventoryState as StartInventoryState.Error).message}",
+                    text = stringResource(R.string.inventory_error, (startInventoryState as StartInventoryState.Error).message),
                     color = MaterialTheme.colors.error,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -131,7 +170,7 @@ fun InventoryScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Незакрытые инвентаризации",
+                text = stringResource(R.string.inventory_open_list),
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -150,7 +189,7 @@ fun InventoryScreen(
                 is InventoriesState.Success -> {
                     if (state.inventories.isEmpty()) {
                         Text(
-                            text = "Нет незакрытых инвентаризаций",
+                            text = stringResource(R.string.inventory_empty),
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                             modifier = Modifier.padding(vertical = 16.dp)
@@ -170,7 +209,7 @@ fun InventoryScreen(
                 }
                 is InventoriesState.Error -> {
                     Text(
-                        text = "Ошибка загрузки: ${state.message}",
+                        text = stringResource(R.string.inventory_error_loading, state.message),
                         color = MaterialTheme.colors.error,
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
@@ -197,19 +236,34 @@ fun InventoryItem(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "ID: ${inventory.id}",
-                style = MaterialTheme.typography.body1
+                text = inventory.warehouse.name,
+                style = MaterialTheme.typography.h6
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Начата: ${inventory.startedAt}",
+                text = stringResource(R.string.inventory_id_label, inventory.id.take(8) + "..."),
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Статус: ${inventory.status}",
+                text = stringResource(R.string.inventory_started_label, inventory.startDate),
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.inventory_status_label, inventory.status),
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.inventory_created_by_label, inventory.createdBy.firstName, inventory.createdBy.lastName),
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
             )
         }
     }
 }
+

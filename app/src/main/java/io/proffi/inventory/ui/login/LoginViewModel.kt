@@ -20,11 +20,15 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
             _loginState.value = if (result.isSuccess) {
                 val response = result.getOrNull()!!
-                LoginState.Success(response.access_token, response.refresh_token, response.user)
+                LoginState.Success(response.accessToken, response.refreshToken, response.user)
             } else {
                 LoginState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }
         }
+    }
+
+    fun resetLoginState() {
+        _loginState.value = LoginState.Empty
     }
 }
 

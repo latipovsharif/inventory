@@ -8,8 +8,8 @@ class InventoryRepository(private val apiService: ApiService) {
 
     suspend fun getOpenInventories(warehouseId: String): Result<List<Inventory>> {
         return try {
-            val inventories = apiService.getOpenInventories(warehouseId)
-            Result.success(inventories)
+            val response = apiService.getOpenInventories(warehouseId)
+            Result.success(response.body)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -24,21 +24,68 @@ class InventoryRepository(private val apiService: ApiService) {
 
             val response = apiService.startInventory(
                 StartInventoryRequest(
-                    warehouse_id = warehouseId,
-                    start_date = startDate
+                    warehouseId = warehouseId,
+                    startDate = startDate
                 )
             )
             // Возвращаем только ID инвентаризации из body
             Result.success(response.body.id)
+        } catch (e: retrofit2.HttpException) {
+            // Проверяем, является ли ошибка HTTP 409 (Conflict)
+            if (e.code() == 409) {
+                Result.failure(InventoryConflictException("Существует не закрытая инвентаризация"))
+            } else {
+                Result.failure(e)
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun scanBarcode(inventoryId: String, barcode: String, quantity: Int): Result<ScanBarcodeResponse> {
+    suspend fun scanBarcode(inventoryId: String, barcode: String, quantity: Double): Result<ScanBarcodeResponse> {
         return try {
             val response = apiService.scanBarcode(
-                ScanBarcodeRequest(inventoryId, barcode, quantity)
+                inventoryId = inventoryId,
+                request = ScanBarcodeRequest(barcode = barcode, quantity = quantity)
+            )
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getInventoryItemDetails(inventoryId: String, barcode: String): Result<InventoryItemDetailsResponse> {
+        return try {
+            val response = apiService.getInventoryItemDetails(inventoryId, barcode)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateInventoryItem(inventoryId: String, barcode: String, quantity: Double): Result<UpdateInventoryItemResponse> {
+        return try {
+            // Сначала получаем текущее количество из сервера для проверки актуальности данных
+            val detailsResponse = apiService.getInventoryItemDetails(inventoryId, barcode)
+
+            if (detailsResponse.body.isEmpty()) {
+                return Result.failure(Exception("Product not found in inventory"))
+            }
+
+            val itemDetail = detailsResponse.body[0]
+            val productId = itemDetail.product.id
+            val previousQuantity = itemDetail.actualQuantity
+
+            // Отправляем новое количество как массив с product_id, actual_quantity и previous_actual_quantity
+            val response = apiService.updateInventoryItem(
+                inventoryId = inventoryId,
+                request = listOf(
+                    UpdateInventoryItemRequest(
+                        productId = productId,
+                        actualQuantity = quantity,
+                        previousActualQuantity = previousQuantity
+                    )
+                )
             )
             Result.success(response)
         } catch (e: Exception) {
@@ -55,3 +102,7 @@ class InventoryRepository(private val apiService: ApiService) {
         }
     }
 }
+
+// Пользовательское исключение для конфликта инвентаризации (HTTP 409)
+class InventoryConflictException(message: String) : Exception(message)
+

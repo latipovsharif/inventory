@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Inventory</string>
+    <string name="splash_copyright">proffi.io\nall rights reserved 2026</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">Login</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Sign In</string>
+
+    <!-- Warehouse Screen -->
+    <string name="warehouse_title">Select Warehouse</string>
+    <string name="warehouse_logout">Logout</string>
+    <string name="warehouse_empty">No available warehouses</string>
+    <string name="warehouse_error">Error: %s</string>
+    <string name="warehouse_retry">Retry</string>
+
+    <!-- Inventory Screen -->
+    <string name="inventory_management_title">Inventory Management</string>
+    <string name="inventory_start_new">Start New Inventory</string>
+    <string name="inventory_open_list">Open Inventories</string>
+    <string name="inventory_empty">No open inventories</string>
+    <string name="inventory_error_loading">Loading error: %s</string>
+    <string name="inventory_error">Error: %s</string>
+    <string name="inventory_conflict_dialog_title">Error</string>
+    <string name="inventory_conflict_ok">OK</string>
+    <string name="inventory_id_label">ID: %s</string>
+    <string name="inventory_started_label">Started: %s</string>
+    <string name="inventory_status_label">Status: %s</string>
+    <string name="inventory_created_by_label">Created by: %s %s</string>
+
+    <!-- Scanner Screen -->
+    <string name="scanner_title">Scanning - %s</string>
+    <string name="scanner_inventory_label">Inventory</string>
+    <string name="scanner_id_label">ID: %s</string>
+    <string name="scanner_barcode_label">Barcode</string>
+    <string name="scanner_quantity_label">Quantity</string>
+    <string name="scanner_send_button">Send Data</string>
+    <string name="scanner_success_message">✓ %s</string>
+    <string name="scanner_error_message">Error: %s</string>
+    <string name="scanner_barcode_display">Barcode: %s</string>
+    <string name="scanner_quantity_display">Quantity: %s</string>
+    <string name="scanner_scanned_items_title">Scanned Items (%d)</string>
+    <string name="scanner_quantity_header">Quantity:</string>
+    <string name="scanner_edit_ok">OK</string>
+    <string name="scanner_prompt">Scan barcode</string>
+    <string name="scanner_scanned_toast">Scanned: %s</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="scan">Scan</string>
+    <string name="edit">Edit</string>
+    <string name="loading">Loading…</string>
+    <string name="camera_permission_required">Camera permission required</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_back">Back</string>
+    <string name="cd_logout">Logout</string>
+    <string name="cd_scan">Scan</string>
+    <string name="cd_edit">Edit</string>
+    <string name="cd_language">Language</string>
+
+    <!-- Language Selection -->
+    <string name="language_select_title">Select Language</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_english">English</string>
+    <string name="language_system">System Default</string>
+    <string name="language_changed">Language changed</string>
+
+    <!-- Main Menu -->
+    <string name="menu_title">Main Menu</string>
+    <string name="menu_inventory">Inventory</string>
+    <string name="menu_warehouses">Warehouses</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_logout">Logout</string>
+    <string name="menu_open">Open menu</string>
+    <string name="menu_close">Close menu</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance_section">Appearance</string>
+    <string name="settings_other_section">Other Settings</string>
+    <string name="settings_language">App Language</string>
+    <string name="settings_language_subtitle">Choose interface language</string>
+    <string name="settings_applying_language">Applying language…</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_subtitle">Light, dark or system</string>
+    <string name="settings_theme_dialog_title">Choose Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System Default</string>
+    <string name="settings_coming_soon">Additional settings will appear in future versions</string>
+</resources>
