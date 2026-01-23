@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -174,7 +175,8 @@ fun ScannerScreen(
                         IconButton(onClick = onScanClick) {
                             Icon(Icons.Default.QrCodeScanner, contentDescription = stringResource(R.string.cd_scan))
                         }
-                    }
+                    },
+                    shape = RoundedCornerShape(12.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -190,7 +192,8 @@ fun ScannerScreen(
                     label = { Text(stringResource(R.string.scanner_quantity_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -205,7 +208,12 @@ fun ScannerScreen(
                         .height(56.dp),
                     enabled = barcode.isNotBlank() &&
                              quantity.isNotBlank() &&
-                             scanState !is ScanState.Loading
+                             scanState !is ScanState.Loading,
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = ButtonDefaults.elevation(
+                        defaultElevation = 4.dp,
+                        pressedElevation = 8.dp
+                    )
                 ) {
                     if (scanState is ScanState.Loading) {
                         CircularProgressIndicator(
@@ -223,7 +231,9 @@ fun ScannerScreen(
                     is ScanState.Success -> {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                            backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp),
+                            elevation = 2.dp
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp)
@@ -256,7 +266,9 @@ fun ScannerScreen(
                     is ScanState.Error -> {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            backgroundColor = MaterialTheme.colors.error.copy(alpha = 0.1f)
+                            backgroundColor = MaterialTheme.colors.error.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp),
+                            elevation = 2.dp
                         ) {
                             Text(
                                 text = stringResource(R.string.scanner_error_message, state.message),
@@ -320,8 +332,9 @@ fun ScannedItemCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = 2.dp,
-        backgroundColor = MaterialTheme.colors.surface
+        elevation = 4.dp,
+        backgroundColor = MaterialTheme.colors.surface,
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier.padding(12.dp)
