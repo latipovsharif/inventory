@@ -87,8 +87,9 @@ fun InventoryScreen(
     }
 
     LaunchedEffect(currentInventoryId) {
-        if (currentInventoryId != null) {
-            onInventoryStarted(currentInventoryId!!)
+        currentInventoryId?.let { inventoryId ->
+            onInventoryStarted(inventoryId)
+            viewModel.resetCurrentInventoryId()
         }
     }
 

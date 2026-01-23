@@ -63,6 +63,10 @@ class InventoryViewModel(
         _currentInventoryId.value = inventoryId
     }
 
+    fun resetCurrentInventoryId() {
+        _currentInventoryId.value = null
+    }
+
     fun closeInventory(inventoryId: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             val result = inventoryRepository.closeInventory(inventoryId)

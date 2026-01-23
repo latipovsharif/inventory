@@ -2,6 +2,8 @@ package io.proffi.inventory.ui.settings
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import io.proffi.inventory.R
 import io.proffi.inventory.ui.base.BaseActivity
 import io.proffi.inventory.util.LanguageHelper
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SettingsActivity : BaseActivity() {
@@ -31,38 +34,51 @@ class SettingsActivity : BaseActivity() {
             var showLanguageDialog by remember { mutableStateOf(false) }
             var showThemeDialog by remember { mutableStateOf(false) }
             var isChangingLanguage by remember { mutableStateOf(false) }
+            var contentKey by remember { mutableStateOf(0) }
 
-            MaterialTheme {
-                SettingsScreen(
-                    onBackPressed = { finish() },
-                    onLanguageClick = { showLanguageDialog = true },
-                    onThemeClick = { showThemeDialog = true }
-                )
-
-                if (showLanguageDialog) {
-                    LanguageSelectionDialog(
-                        isLoading = isChangingLanguage,
-                        currentLanguage = LanguageHelper.getCurrentLanguage(),
-                        onDismiss = {
-                            if (!isChangingLanguage) {
-                                showLanguageDialog = false
-                            }
-                        },
-                        onLanguageSelected = { languageCode ->
-                            coroutineScope.launch {
-                                isChangingLanguage = true
-                                // Сохраняем выбор
-                                LanguageHelper.saveLanguage(context, languageCode)
-                                // Применяем немедленно
-                                LanguageHelper.applyLanguage(languageCode)
-                                isChangingLanguage = false
-                                showLanguageDialog = false
-                                // Перезапускаем Activity для применения изменений
-                                recreate()
-                            }
-                        }
+            AnimatedContent(
+                targetState = contentKey,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300)) togetherWith
+                            fadeOut(animationSpec = tween(300))
+                },
+                label = "language_change_animation"
+            ) { _ ->
+                MaterialTheme {
+                    SettingsScreen(
+                        onBackPressed = { finish() },
+                        onLanguageClick = { showLanguageDialog = true },
+                        onThemeClick = { showThemeDialog = true }
                     )
-                }
+
+                    if (showLanguageDialog) {
+                        LanguageSelectionDialog(
+                            isLoading = isChangingLanguage,
+                            currentLanguage = LanguageHelper.getCurrentLanguage(),
+                            onDismiss = {
+                                if (!isChangingLanguage) {
+                                    showLanguageDialog = false
+                                }
+                            },
+                            onLanguageSelected = { languageCode ->
+                                coroutineScope.launch {
+                                    isChangingLanguage = true
+                                    // Сохраняем выбор
+                                    LanguageHelper.saveLanguage(context, languageCode)
+                                    // Применяем немедленно
+                                    LanguageHelper.applyLanguage(languageCode)
+                                    // Даём время на анимацию fade out
+                                    delay(150)
+                                    isChangingLanguage = false
+                                    showLanguageDialog = false
+                                    // Небольшая задержка перед recreate для плавности
+                                    delay(150)
+                                    // Перезапускаем Activity для применения изменений
+                                    recreate()
+                                }
+                            }
+                        )
+                    }
 
                 if (showThemeDialog) {
                     ThemeSelectionDialog(
@@ -72,6 +88,7 @@ class SettingsActivity : BaseActivity() {
                             // TODO: Реализовать смену темы позже
                         }
                     )
+                }
                 }
             }
         }

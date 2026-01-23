@@ -3,6 +3,8 @@ package io.proffi.inventory.ui.main
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -26,22 +28,34 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            var contentKey by remember { mutableStateOf(0) }
+            val activity = this@MainActivity
+
+            AnimatedContent(
+                targetState = contentKey,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300)) togetherWith
+                            fadeOut(animationSpec = tween(300))
+                },
+                label = "language_change_animation"
+            ) { _ ->
+                MaterialTheme {
                 MainScreen(
                     onLogout = {
                         // Очистить токены и вернуться на экран входа
-                        startActivity(Intent(this, LoginActivity::class.java))
+                        startActivity(Intent(activity, LoginActivity::class.java))
                         finish()
                     },
                     onInventoryClick = {
                         // Открыть экран выбора склада для инвентаризации
-                        startActivity(Intent(this, WarehouseActivity::class.java))
+                        startActivity(Intent(activity, WarehouseActivity::class.java))
                     },
                     onSettingsClick = {
                         // Открыть экран настроек
-                        startActivity(Intent(this, io.proffi.inventory.ui.settings.SettingsActivity::class.java))
+                        startActivity(Intent(activity, io.proffi.inventory.ui.settings.SettingsActivity::class.java))
                     }
                 )
+                }
             }
         }
     }

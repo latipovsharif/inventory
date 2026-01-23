@@ -41,7 +41,7 @@ class SplashActivity : BaseActivity() {
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
     LaunchedEffect(Unit) {
-        delay(2500) // Показываем splash screen 2.5 секунды
+        delay(1500) // Показываем splash screen 2.5 секунды
         onTimeout()
     }
 
@@ -53,8 +53,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+            verticalArrangement = Arrangement.Center
         ) {
             // Пространство сверху
             Spacer(modifier = Modifier.weight(1f))
