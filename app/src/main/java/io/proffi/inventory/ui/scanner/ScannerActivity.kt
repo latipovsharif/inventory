@@ -23,16 +23,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import com.google.zxing.integration.android.IntentIntegrator
+import androidx.lifecycle.lifecycleScope
 import io.proffi.inventory.R
+import io.proffi.inventory.scanner.*
 import io.proffi.inventory.ui.base.BaseActivity
+import io.proffi.inventory.util.ScannerPreferences
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ScannerActivity : BaseActivity() {
+class ScannerActivity : BaseActivity(), ScannerCallback {
 
     private val viewModel: ScannerViewModel by viewModel()
     private var inventoryId: String = ""
+    private lateinit var scannerManager: ScannerManager
+    private lateinit var scannerPreferences: ScannerPreferences
+    private var currentScannerType: ScannerType = ScannerType.CAMERA
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -44,11 +50,38 @@ class ScannerActivity : BaseActivity() {
         }
     }
 
+    override fun onScanResult(barcode: String) {
+        lifecycleScope.launch {
+            // Автоматически отправляем на сервер с количеством 1
+            viewModel.scanBarcode(inventoryId, barcode, 1.0)
+        }
+    }
+
+    override fun onScanError(error: String) {
+        runOnUiThread {
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         inventoryId = intent.getStringExtra("inventoryId") ?: ""
         val warehouseName = intent.getStringExtra("warehouseName") ?: ""
+
+        scannerPreferences = ScannerPreferences(this)
+        scannerManager = ScannerManager(this, this)
+
+        // Инициализируем сканер на основе настроек
+        lifecycleScope.launch {
+            currentScannerType = scannerPreferences.scannerType.first()
+            scannerManager.initScanner(currentScannerType)
+
+            // Для Urovo запускаем сканер сразу
+            if (currentScannerType == ScannerType.UROVO_I6310) {
+                scannerManager.getCurrentScanner()?.startScan()
+            }
+        }
 
         setContent {
             MaterialTheme {
@@ -56,6 +89,7 @@ class ScannerActivity : BaseActivity() {
                     viewModel = viewModel,
                     inventoryId = inventoryId,
                     warehouseName = warehouseName,
+                    currentScannerType = currentScannerType,
                     onBackPressed = { finish() },
                     onScanClick = { checkCameraPermissionAndScan() }
                 )
@@ -63,38 +97,41 @@ class ScannerActivity : BaseActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        scannerManager.release()
+    }
+
     private fun checkCameraPermissionAndScan() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                startBarcodeScanner()
+        // Для камеры проверяем разрешение, для Urovo - нет
+        if (currentScannerType == ScannerType.CAMERA) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    startBarcodeScanner()
+                }
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
             }
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }
+        } else {
+            startBarcodeScanner()
         }
     }
 
     private fun startBarcodeScanner() {
-        IntentIntegrator(this).apply {
-            setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
-            setPrompt(getString(R.string.scanner_prompt))
-            setCameraId(0)
-            setBeepEnabled(true)
-            setBarcodeImageEnabled(false)
-            setOrientationLocked(false)
-        }.initiateScan()
+        scannerManager.getCurrentScanner()?.startScan()
     }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
-        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-        if (result != null) {
-            if (result.contents != null) {
-                // Barcode scanned successfully
-                Toast.makeText(this, getString(R.string.scanner_scanned_toast, result.contents), Toast.LENGTH_SHORT).show()
+        // Только для камеры
+        if (currentScannerType == ScannerType.CAMERA) {
+            val barcode = CameraScanner.parseResult(requestCode, resultCode, data)
+            if (barcode != null) {
+                onScanResult(barcode)
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
@@ -107,6 +144,7 @@ fun ScannerScreen(
     viewModel: ScannerViewModel,
     inventoryId: String,
     warehouseName: String,
+    currentScannerType: ScannerType,
     onBackPressed: () -> Unit,
     onScanClick: () -> Unit
 ) {
@@ -458,4 +496,3 @@ fun ScannedItemCard(
         }
     }
 }
-

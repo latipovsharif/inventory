@@ -88,6 +88,10 @@ dependencies {
     implementation(libs.zxing)
     implementation(libs.zxing.android)
 
+    // Urovo SDK for i6310 Pro (optional - will be provided as local AAR)
+    // Place the SDK AAR in app/libs/ directory
+    compileOnly(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

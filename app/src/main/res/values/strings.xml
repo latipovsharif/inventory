@@ -91,4 +91,27 @@
     <string name="settings_theme_dark">Тёмная</string>
     <string name="settings_theme_system">Системная</string>
     <string name="settings_coming_soon">Дополнительные настройки появятся в будущих версиях</string>
+
+    <!-- Scanner Settings -->
+    <string name="settings_scanner_device">Устройство сканирования</string>
+    <string name="settings_scanner_dialog_title">Выберите устройство сканирования</string>
+    <string name="scanner_type_camera">Камера устройства</string>
+    <string name="scanner_type_urovo_i6310">Urovo i6310 Pro (ТСД)</string>
+
+    <!-- Scanner SDK Download -->
+    <string name="scanner_sdk_downloaded">SDK загружен ✓</string>
+    <string name="scanner_sdk_not_downloaded">Требуется загрузка SDK</string>
+    <string name="scanner_download_title">Загрузка SDK для %s</string>
+    <string name="scanner_download_ready">Готов к загрузке библиотеки устройства</string>
+    <string name="scanner_download_checking">Проверка наличия файлов…</string>
+    <string name="scanner_download_already_downloaded">SDK уже загружен</string>
+    <string name="scanner_download_size">%d МБ из %d МБ</string>
+    <string name="scanner_download_size_unknown">%d МБ загружено</string>
+    <string name="scanner_download_please_wait">Пожалуйста, подождите…</string>
+    <string name="scanner_download_success">Загрузка завершена</string>
+    <string name="scanner_download_ready_to_use">Устройство готово к использованию</string>
+    <string name="scanner_download_error">Ошибка загрузки</string>
+    <string name="scanner_download_done">Готово</string>
+    <string name="scanner_download_retry">Повторить</string>
+    <string name="scanner_download_cancel">Отмена</string>
 </resources>

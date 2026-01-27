@@ -92,4 +92,27 @@
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System Default</string>
     <string name="settings_coming_soon">Additional settings will appear in future versions</string>
+
+    <!-- Scanner Settings -->
+    <string name="settings_scanner_device">Scanning Device</string>
+    <string name="settings_scanner_dialog_title">Choose Scanning Device</string>
+    <string name="scanner_type_camera">Device Camera</string>
+    <string name="scanner_type_urovo_i6310">Urovo i6310 Pro (PDA)</string>
+
+    <!-- Scanner SDK Download -->
+    <string name="scanner_sdk_downloaded">SDK downloaded ✓</string>
+    <string name="scanner_sdk_not_downloaded">SDK download required</string>
+    <string name="scanner_download_title">Downloading SDK for %s</string>
+    <string name="scanner_download_ready">Ready to download device library</string>
+    <string name="scanner_download_checking">Checking for files…</string>
+    <string name="scanner_download_already_downloaded">SDK already downloaded</string>
+    <string name="scanner_download_size">%d MB of %d MB</string>
+    <string name="scanner_download_size_unknown">%d MB downloaded</string>
+    <string name="scanner_download_please_wait">Please wait…</string>
+    <string name="scanner_download_success">Download complete</string>
+    <string name="scanner_download_ready_to_use">Device ready to use</string>
+    <string name="scanner_download_error">Download error</string>
+    <string name="scanner_download_done">Done</string>
+    <string name="scanner_download_retry">Retry</string>
+    <string name="scanner_download_cancel">Cancel</string>
 </resources>

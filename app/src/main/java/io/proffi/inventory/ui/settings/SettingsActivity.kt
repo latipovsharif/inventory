@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.MobileScreenShare
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,10 +19,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import io.proffi.inventory.R
+import io.proffi.inventory.scanner.DownloadState
+import io.proffi.inventory.scanner.ScannerType
+import io.proffi.inventory.scanner.SdkDownloadManager
+import io.proffi.inventory.scanner.SdkLibraryConfig
 import io.proffi.inventory.ui.base.BaseActivity
 import io.proffi.inventory.util.LanguageHelper
+import io.proffi.inventory.util.ScannerPreferences
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SettingsActivity : BaseActivity() {
@@ -33,8 +41,20 @@ class SettingsActivity : BaseActivity() {
             val coroutineScope = rememberCoroutineScope()
             var showLanguageDialog by remember { mutableStateOf(false) }
             var showThemeDialog by remember { mutableStateOf(false) }
+            var showScannerDialog by remember { mutableStateOf(false) }
+            var showDownloadDialog by remember { mutableStateOf(false) }
             var isChangingLanguage by remember { mutableStateOf(false) }
             var contentKey by remember { mutableStateOf(0) }
+            var currentScannerType by remember { mutableStateOf(ScannerType.CAMERA) }
+            var downloadState by remember { mutableStateOf<DownloadState>(DownloadState.Idle) }
+            var selectedScannerForDownload by remember { mutableStateOf<ScannerType?>(null) }
+
+            val sdkDownloadManager = remember { SdkDownloadManager(context) }
+
+            LaunchedEffect(Unit) {
+                val scannerPrefs = ScannerPreferences(context)
+                currentScannerType = scannerPrefs.scannerType.first()
+            }
 
             AnimatedContent(
                 targetState = contentKey,
@@ -48,7 +68,9 @@ class SettingsActivity : BaseActivity() {
                     SettingsScreen(
                         onBackPressed = { finish() },
                         onLanguageClick = { showLanguageDialog = true },
-                        onThemeClick = { showThemeDialog = true }
+                        onThemeClick = { showThemeDialog = true },
+                        onScannerClick = { showScannerDialog = true },
+                        currentScannerType = currentScannerType
                     )
 
                     if (showLanguageDialog) {
@@ -89,6 +111,86 @@ class SettingsActivity : BaseActivity() {
                         }
                     )
                 }
+
+                if (showScannerDialog) {
+                    ScannerSelectionDialog(
+                        currentScannerType = currentScannerType,
+                        sdkDownloadManager = sdkDownloadManager,
+                        onDismiss = { showScannerDialog = false },
+                        onScannerSelected = { scannerType ->
+                            // Проверяем, требуется ли загрузка SDK
+                            val config = SdkLibraryConfig.getConfig(scannerType)
+                            if (config != null && SdkLibraryConfig.requiresDownload(scannerType)) {
+                                // Проверяем, загружен ли SDK
+                                if (!sdkDownloadManager.isSdkDownloaded(config)) {
+                                    // Нужно загрузить SDK
+                                    selectedScannerForDownload = scannerType
+                                    showScannerDialog = false
+                                    showDownloadDialog = true
+
+                                    // Запускаем загрузку
+                                    lifecycleScope.launch {
+                                        sdkDownloadManager.downloadSdk(config).collect { state ->
+                                            downloadState = state
+
+                                            // Если успешно загружено, устанавливаем сканер
+                                            if (state is DownloadState.Success || state is DownloadState.AlreadyDownloaded) {
+                                                val scannerPrefs = ScannerPreferences(context)
+                                                scannerPrefs.setScannerType(scannerType)
+                                                currentScannerType = scannerType
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // SDK уже загружен, просто переключаем
+                                    lifecycleScope.launch {
+                                        val scannerPrefs = ScannerPreferences(context)
+                                        scannerPrefs.setScannerType(scannerType)
+                                        currentScannerType = scannerType
+                                        showScannerDialog = false
+                                    }
+                                }
+                            } else {
+                                // Встроенный сканер (камера), не требует загрузки
+                                lifecycleScope.launch {
+                                    val scannerPrefs = ScannerPreferences(context)
+                                    scannerPrefs.setScannerType(scannerType)
+                                    currentScannerType = scannerType
+                                    showScannerDialog = false
+                                }
+                            }
+                        }
+                    )
+                }
+
+                if (showDownloadDialog && selectedScannerForDownload != null) {
+                    ScannerDownloadDialog(
+                        scannerName = stringResource(selectedScannerForDownload!!.displayNameRes),
+                        downloadState = downloadState,
+                        onDismiss = {
+                            showDownloadDialog = false
+                            downloadState = DownloadState.Idle
+                            selectedScannerForDownload = null
+                        },
+                        onRetry = {
+                            // Повторная попытка загрузки
+                            val config = SdkLibraryConfig.getConfig(selectedScannerForDownload!!)
+                            if (config != null) {
+                                lifecycleScope.launch {
+                                    sdkDownloadManager.downloadSdk(config).collect { state ->
+                                        downloadState = state
+
+                                        if (state is DownloadState.Success || state is DownloadState.AlreadyDownloaded) {
+                                            val scannerPrefs = ScannerPreferences(context)
+                                            scannerPrefs.setScannerType(selectedScannerForDownload!!)
+                                            currentScannerType = selectedScannerForDownload!!
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
                 }
             }
         }
@@ -99,7 +201,9 @@ class SettingsActivity : BaseActivity() {
 fun SettingsScreen(
     onBackPressed: () -> Unit,
     onLanguageClick: () -> Unit,
-    onThemeClick: () -> Unit
+    onThemeClick: () -> Unit,
+    onScannerClick: () -> Unit,
+    currentScannerType: ScannerType
 ) {
     Scaffold(
         topBar = {
@@ -146,6 +250,16 @@ fun SettingsScreen(
 
             // Секция: Другие настройки (для будущего)
             SettingsSectionHeader(title = stringResource(R.string.settings_other_section))
+
+            // Выбор устройства сканирования
+            SettingsItem(
+                icon = Icons.Default.MobileScreenShare,
+                title = stringResource(R.string.settings_scanner_device),
+                subtitle = stringResource(currentScannerType.displayNameRes),
+                onClick = onScannerClick
+            )
+
+            Divider()
 
             // Заглушка для будущих настроек
             Card(
@@ -387,3 +501,101 @@ fun ThemeSelectionDialog(
         }
     )
 }
+
+@Composable
+fun ScannerSelectionDialog(
+    currentScannerType: ScannerType,
+    sdkDownloadManager: SdkDownloadManager,
+    onDismiss: () -> Unit,
+    onScannerSelected: (ScannerType) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.settings_scanner_dialog_title))
+        },
+        text = {
+            Column {
+                ScannerType.values().forEach { scannerType ->
+                    val config = SdkLibraryConfig.getConfig(scannerType)
+                    val isDownloaded = config?.let { sdkDownloadManager.isSdkDownloaded(it) } ?: true
+                    val requiresDownload = SdkLibraryConfig.requiresDownload(scannerType)
+
+                    ScannerOptionButton(
+                        scannerType = scannerType,
+                        isSelected = currentScannerType == scannerType,
+                        isDownloaded = isDownloaded,
+                        requiresDownload = requiresDownload,
+                        onClick = { onScannerSelected(scannerType) }
+                    )
+                    if (scannerType != ScannerType.values().last()) {
+                        Divider()
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.inventory_conflict_ok))
+            }
+        }
+    )
+}
+
+@Composable
+fun ScannerOptionButton(
+    scannerType: ScannerType,
+    isSelected: Boolean,
+    isDownloaded: Boolean,
+    requiresDownload: Boolean,
+    onClick: () -> Unit
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(scannerType.displayNameRes),
+                    style = MaterialTheme.typography.body1,
+                    color = if (isSelected) {
+                        MaterialTheme.colors.primary
+                    } else {
+                        MaterialTheme.colors.onSurface
+                    }
+                )
+
+                // Показываем статус загрузки
+                if (requiresDownload) {
+                    Text(
+                        text = if (isDownloaded) {
+                            stringResource(R.string.scanner_sdk_downloaded)
+                        } else {
+                            stringResource(R.string.scanner_sdk_not_downloaded)
+                        },
+                        style = MaterialTheme.typography.caption,
+                        color = if (isDownloaded) {
+                            MaterialTheme.colors.primary.copy(alpha = 0.6f)
+                        } else {
+                            MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+                        }
+                    )
+                }
+            }
+
+            if (isSelected) {
+                Text(
+                    text = "✓",
+                    style = MaterialTheme.typography.h6,
+                    color = MaterialTheme.colors.primary
+                )
+            }
+        }
+    }
+}
+
