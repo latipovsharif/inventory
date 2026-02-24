@@ -72,6 +72,8 @@
     <!-- Main Menu -->
     <string name="menu_title">Main Menu</string>
     <string name="menu_inventory">Inventory</string>
+    <string name="menu_product_move">Product Move</string>
+    <string name="menu_product_receive">Receive Products</string>
     <string name="menu_warehouses">Warehouses</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_logout">Logout</string>
@@ -115,4 +117,72 @@
     <string name="scanner_download_done">Done</string>
     <string name="scanner_download_retry">Retry</string>
     <string name="scanner_download_cancel">Cancel</string>
+
+    <!-- Product Move Screen -->
+    <string name="product_move_title">Product Move</string>
+    <string name="product_move_select_warehouses">Select Warehouses for Move</string>
+    <string name="product_move_from_warehouse">From Warehouse</string>
+    <string name="product_move_to_warehouse">To Warehouse</string>
+    <string name="product_move_select_from">Select source warehouse</string>
+    <string name="product_move_select_to">Select destination warehouse</string>
+    <string name="product_move_start">Start Move</string>
+    <string name="product_move_scanning_title">Scanning - Product Move</string>
+    <string name="product_move_id_label">Move ID: %s</string>
+    <string name="product_move_from_label">From: %s</string>
+    <string name="product_move_to_label">To: %s</string>
+    <string name="product_move_barcode_label">Barcode</string>
+    <string name="product_move_quantity_label">Quantity</string>
+    <string name="product_move_send_button">Send Data</string>
+    <string name="product_move_complete_button">Complete Move</string>
+    <string name="product_move_success_message">✓ %s</string>
+    <string name="product_move_error_message">Error: %s</string>
+    <string name="product_move_scanned_items_title">Scanned Items (%d)</string>
+    <string name="product_move_product_name">Product: %s</string>
+    <string name="product_move_empty">No active moves</string>
+    <string name="product_move_error_loading">Loading error: %s</string>
+    <string name="product_move_conflict_dialog_title">Error</string>
+    <string name="product_move_conflict_ok">OK</string>
+    <string name="product_move_same_warehouse_error">Source and destination warehouses cannot be the same</string>
+    <string name="product_move_select_both_warehouses">Select both warehouses</string>
+    <string name="product_move_completed">Move completed</string>
+    <string name="product_move_complete_confirm_title">Complete Move?</string>
+    <string name="product_move_complete_confirm_message">Are you sure you want to complete the move? Scanned items: %d</string>
+    <string name="product_move_complete_confirm_yes">Complete</string>
+    <string name="product_move_complete_confirm_no">Cancel</string>
+    <string name="product_move_active_list">Active Moves</string>
+    <string name="product_move_continue">Continue Move</string>
+
+    <!-- Product Receive Screen -->
+    <string name="product_receive_title">Receive Products</string>
+    <string name="product_receive_select_warehouse">Select Warehouse for Receiving</string>
+    <string name="product_receive_warehouse">Receiving Warehouse</string>
+    <string name="product_receive_select">Select warehouse</string>
+    <string name="product_receive_view_incoming">View Incoming Transfers</string>
+    <string name="product_receive_scanning_title">Receiving - %s</string>
+    <string name="product_receive_move_info">Transfer</string>
+    <string name="product_receive_from_label">From: %s</string>
+    <string name="product_receive_to_label">To: %s</string>
+    <string name="product_receive_id_label">ID: %s</string>
+    <string name="product_receive_document_number_label">Document #: %s</string>
+    <string name="product_receive_total_items_label">Items: %d</string>
+    <string name="product_receive_barcode_label">Barcode</string>
+    <string name="product_receive_quantity_label">Quantity</string>
+    <string name="product_receive_send_button">Receive Product</string>
+    <string name="product_receive_confirm_button">Confirm Receipt</string>
+    <string name="product_receive_success_message">✓ %s</string>
+    <string name="product_receive_error_message">Error: %s</string>
+    <string name="product_receive_scanned_items_title">Received Items (%d)</string>
+    <string name="product_receive_product_name">Product: %s</string>
+    <string name="product_receive_empty">No incoming transfers</string>
+    <string name="product_receive_error_loading">Loading error: %s</string>
+    <string name="product_receive_completed">Receipt confirmed</string>
+    <string name="product_receive_confirm_dialog_title">Confirm Receipt?</string>
+    <string name="product_receive_confirm_dialog_message">Are you sure you want to confirm receipt? Received items: %d</string>
+    <string name="product_receive_confirm_yes">Confirm</string>
+    <string name="product_receive_confirm_no">Cancel</string>
+    <string name="product_receive_incoming_list">Incoming Transfers</string>
+    <string name="product_receive_start">Start Receiving</string>
+    <string name="product_receive_status_label">Status: %s</string>
+    <string name="product_receive_date_label">Date: %s</string>
+    <string name="product_receive_select_move">Select transfer to receive</string>
 </resources>

@@ -50,6 +50,14 @@ class MainActivity : BaseActivity() {
                         // Открыть экран выбора склада для инвентаризации
                         startActivity(Intent(activity, WarehouseActivity::class.java))
                     },
+                    onProductMoveClick = {
+                        // Открыть экран перемещения товара
+                        startActivity(Intent(activity, io.proffi.inventory.ui.productmove.ProductMoveSelectionActivity::class.java))
+                    },
+                    onProductReceiveClick = {
+                        // Открыть экран приёмки товара
+                        startActivity(Intent(activity, io.proffi.inventory.ui.productreceive.ProductReceiveSelectionActivity::class.java))
+                    },
                     onSettingsClick = {
                         // Открыть экран настроек
                         startActivity(Intent(activity, io.proffi.inventory.ui.settings.SettingsActivity::class.java))
@@ -65,6 +73,8 @@ class MainActivity : BaseActivity() {
 fun MainScreen(
     onLogout: () -> Unit,
     onInventoryClick: () -> Unit,
+    onProductMoveClick: () -> Unit,
+    onProductReceiveClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -93,6 +103,18 @@ fun MainScreen(
                         scaffoldState.drawerState.close()
                     }
                     onInventoryClick()
+                },
+                onProductMoveClick = {
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                    onProductMoveClick()
+                },
+                onProductReceiveClick = {
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                    onProductReceiveClick()
                 },
                 onSettingsClick = {
                     scope.launch {
@@ -192,6 +214,8 @@ fun MainScreen(
 @Composable
 fun DrawerContent(
     onInventoryClick: () -> Unit,
+    onProductMoveClick: () -> Unit,
+    onProductReceiveClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onLogout: () -> Unit
 ) {
@@ -238,6 +262,20 @@ fun DrawerContent(
             icon = Icons.Default.Inventory,
             text = stringResource(R.string.menu_inventory),
             onClick = onInventoryClick
+        )
+
+        // Пункт меню: Перемещение товара
+        DrawerMenuItem(
+            icon = Icons.Default.SwapHoriz,
+            text = stringResource(R.string.menu_product_move),
+            onClick = onProductMoveClick
+        )
+
+        // Пункт меню: Приёмка товара
+        DrawerMenuItem(
+            icon = Icons.Default.Inbox,
+            text = stringResource(R.string.menu_product_receive),
+            onClick = onProductReceiveClick
         )
 
         // Пункт меню: Склады

@@ -7,18 +7,6 @@
     <item
         android:width="180dp"
         android:height="180dp"
-        android:gravity="center">
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/splash_logo" />
-    </item>
-
-    <!-- Текст внизу -->
-    <item
-        android:bottom="40dp"
-        android:gravity="bottom|center_horizontal">
-        <shape>
-            <size android:height="60dp" android:width="300dp" />
-        </shape>
-    </item>
+        android:gravity="center"
+        android:drawable="@drawable/splash_logo" />
 </layer-list>

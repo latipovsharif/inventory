@@ -34,6 +34,29 @@ interface ApiService {
 
     @POST("api/inventories/{id}/close")
     suspend fun closeInventory(@Path("id") inventoryId: String): CloseInventoryResponse
+
+    // Product Move endpoints
+    @POST("api/v1/warehouses/product-move")
+    suspend fun startProductMove(@Body request: StartProductMoveRequest): StartProductMoveResponse
+
+    @GET("api/v1/warehouses/product-move")
+    suspend fun getActiveProductMoves(): ProductMoveListResponse
+
+    @POST("api/v1/warehouses/product-move/{id}/scan")
+    suspend fun scanProductForMove(@Path("id") moveId: String, @Body request: ScanProductMoveRequest): ScanProductMoveResponse
+
+    @POST("api/v1/warehouses/product-move/{id}/complete")
+    suspend fun completeProductMove(@Path("id") moveId: String): CompleteProductMoveResponse
+
+    // Product Receive endpoints
+    @GET("api/v1/documents/product-move")
+    suspend fun getIncomingProductMoves(@Query("warehouse_to") warehouseTo: String): ProductMoveListResponse
+
+    @POST("api/v1/documents/product-move/{id}/scan")
+    suspend fun scanProductForReceive(@Path("id") moveId: String, @Body request: ScanProductMoveRequest): ScanProductMoveResponse
+
+    @POST("api/v1/warehouses/product-move/{id}/confirm-receive")
+    suspend fun confirmReceiveProductMove(@Path("id") moveId: String): CompleteProductMoveResponse
 }
 
 // Request/Response models
@@ -253,3 +276,79 @@ data class CloseInventoryResponse(
     val success: Boolean,
     val message: String?
 )
+
+// Product Move models
+data class StartProductMoveRequest(
+    @SerializedName("from_warehouse_id")
+    val fromWarehouseId: String,
+    @SerializedName("to_warehouse_id")
+    val toWarehouseId: String,
+    @SerializedName("start_date")
+    val startDate: String  // Формат ISO 8601: "2026-02-06T10:30:00Z"
+)
+
+data class StartProductMoveResponse(
+    val status: Int,
+    val message: String,
+    val body: ProductMoveBody
+)
+
+data class ProductMoveBody(
+    val id: String
+)
+
+data class ProductMoveListResponse(
+    @SerializedName("page_count")
+    val pageCount: Int,
+    @SerializedName("total_items")
+    val totalItems: Int,
+    @SerializedName("item_per_page")
+    val itemPerPage: Int,
+    val body: List<ProductMove>
+)
+
+data class ProductMove(
+    val id: String,
+    val status: String,
+    @SerializedName("document_number")
+    val documentNumber: String,
+    @SerializedName("warehouse_from")
+    val warehouseFrom: Warehouse,
+    @SerializedName("warehouse_to")
+    val warehouseTo: Warehouse,
+    @SerializedName("total_items")
+    val totalItems: Int,
+    @SerializedName("shipped_at")
+    val shippedAt: String?,
+    @SerializedName("received_at")
+    val receivedAt: String?,
+    @SerializedName("selected_date")
+    val selectedDate: String,
+    @SerializedName("created_at")
+    val createdAt: String
+)
+
+data class ScanProductMoveRequest(
+    val barcode: String,
+    val quantity: Double
+)
+
+data class ScanProductMoveResponse(
+    val status: Int,
+    val message: String,
+    val body: ScanProductMoveBody
+)
+
+data class ScanProductMoveBody(
+    val barcode: String,
+    val message: String,
+    val quantity: Double,
+    @SerializedName("product_name")
+    val productName: String?
+)
+
+data class CompleteProductMoveResponse(
+    val status: Int,
+    val message: String
+)
+

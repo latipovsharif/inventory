@@ -5,6 +5,8 @@ import io.proffi.inventory.network.AuthInterceptor
 import io.proffi.inventory.network.RetrofitClient
 import io.proffi.inventory.ui.inventory.InventoryViewModel
 import io.proffi.inventory.ui.login.LoginViewModel
+import io.proffi.inventory.ui.productmove.ProductMoveViewModel
+import io.proffi.inventory.ui.productreceive.ProductReceiveViewModel
 import io.proffi.inventory.ui.scanner.ScannerViewModel
 import io.proffi.inventory.ui.warehouse.WarehouseViewModel
 import org.koin.android.ext.koin.androidContext
@@ -24,10 +26,13 @@ val appModule = module {
     single { AuthRepository(get(), get()) }
     single { WarehouseRepository(get()) }
     single { InventoryRepository(get()) }
+    single { ProductMoveRepository(get()) }
 
     // ViewModels
     viewModelOf(::LoginViewModel)
     viewModelOf(::WarehouseViewModel)
     viewModelOf(::InventoryViewModel)
     viewModelOf(::ScannerViewModel)
+    viewModelOf(::ProductMoveViewModel)
+    viewModelOf(::ProductReceiveViewModel)
 }

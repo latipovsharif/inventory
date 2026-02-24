@@ -71,6 +71,8 @@
     <!-- Main Menu -->
     <string name="menu_title">Главное меню</string>
     <string name="menu_inventory">Инвентаризация</string>
+    <string name="menu_product_move">Перемещение товара</string>
+    <string name="menu_product_receive">Приёмка товара</string>
     <string name="menu_warehouses">Склады</string>
     <string name="menu_settings">Настройки</string>
     <string name="menu_logout">Выход</string>
@@ -114,4 +116,72 @@
     <string name="scanner_download_done">Готово</string>
     <string name="scanner_download_retry">Повторить</string>
     <string name="scanner_download_cancel">Отмена</string>
+
+    <!-- Product Move Screen -->
+    <string name="product_move_title">Перемещение товара</string>
+    <string name="product_move_select_warehouses">Выбор складов для перемещения</string>
+    <string name="product_move_from_warehouse">Склад отправления</string>
+    <string name="product_move_to_warehouse">Склад назначения</string>
+    <string name="product_move_select_from">Выберите склад отправления</string>
+    <string name="product_move_select_to">Выберите склад назначения</string>
+    <string name="product_move_start">Начать перемещение</string>
+    <string name="product_move_scanning_title">Сканирование - Перемещение</string>
+    <string name="product_move_id_label">ID перемещения: %s</string>
+    <string name="product_move_from_label">Откуда: %s</string>
+    <string name="product_move_to_label">Куда: %s</string>
+    <string name="product_move_barcode_label">Штрихкод</string>
+    <string name="product_move_quantity_label">Количество</string>
+    <string name="product_move_send_button">Отправить данные</string>
+    <string name="product_move_complete_button">Завершить перемещение</string>
+    <string name="product_move_success_message">✓ %s</string>
+    <string name="product_move_error_message">Ошибка: %s</string>
+    <string name="product_move_scanned_items_title">Отсканированные товары (%d)</string>
+    <string name="product_move_product_name">Товар: %s</string>
+    <string name="product_move_empty">Нет активных перемещений</string>
+    <string name="product_move_error_loading">Ошибка загрузки: %s</string>
+    <string name="product_move_conflict_dialog_title">Ошибка</string>
+    <string name="product_move_conflict_ok">OK</string>
+    <string name="product_move_same_warehouse_error">Склады отправления и назначения не могут быть одинаковыми</string>
+    <string name="product_move_select_both_warehouses">Выберите оба склада</string>
+    <string name="product_move_completed">Перемещение завершено</string>
+    <string name="product_move_complete_confirm_title">Завершить перемещение?</string>
+    <string name="product_move_complete_confirm_message">Вы уверены, что хотите завершить перемещение? Отсканировано товаров: %d</string>
+    <string name="product_move_complete_confirm_yes">Завершить</string>
+    <string name="product_move_complete_confirm_no">Отмена</string>
+    <string name="product_move_active_list">Активные перемещения</string>
+    <string name="product_move_continue">Продолжить перемещение</string>
+
+    <!-- Product Receive Screen -->
+    <string name="product_receive_title">Приёмка товара</string>
+    <string name="product_receive_select_warehouse">Выбор склада для приёмки</string>
+    <string name="product_receive_warehouse">Склад приёмки</string>
+    <string name="product_receive_select">Выберите склад</string>
+    <string name="product_receive_view_incoming">Показать входящие перемещения</string>
+    <string name="product_receive_scanning_title">Приёмка - %s</string>
+    <string name="product_receive_move_info">Перемещение</string>
+    <string name="product_receive_from_label">От: %s</string>
+    <string name="product_receive_to_label">На: %s</string>
+    <string name="product_receive_id_label">ID: %s</string>
+    <string name="product_receive_document_number_label">Документ №: %s</string>
+    <string name="product_receive_total_items_label">Товаров: %d</string>
+    <string name="product_receive_barcode_label">Штрихкод</string>
+    <string name="product_receive_quantity_label">Количество</string>
+    <string name="product_receive_send_button">Принять товар</string>
+    <string name="product_receive_confirm_button">Подтвердить приёмку</string>
+    <string name="product_receive_success_message">✓ %s</string>
+    <string name="product_receive_error_message">Ошибка: %s</string>
+    <string name="product_receive_scanned_items_title">Принятые товары (%d)</string>
+    <string name="product_receive_product_name">Товар: %s</string>
+    <string name="product_receive_empty">Нет входящих перемещений</string>
+    <string name="product_receive_error_loading">Ошибка загрузки: %s</string>
+    <string name="product_receive_completed">Приёмка завершена</string>
+    <string name="product_receive_confirm_dialog_title">Подтвердить приёмку?</string>
+    <string name="product_receive_confirm_dialog_message">Вы уверены, что хотите подтвердить приёмку? Принято товаров: %d</string>
+    <string name="product_receive_confirm_yes">Подтвердить</string>
+    <string name="product_receive_confirm_no">Отмена</string>
+    <string name="product_receive_incoming_list">Входящие перемещения</string>
+    <string name="product_receive_start">Начать приёмку</string>
+    <string name="product_receive_status_label">Статус: %s</string>
+    <string name="product_receive_date_label">Дата: %s</string>
+    <string name="product_receive_select_move">Выберите перемещение для приёмки</string>
 </resources>
