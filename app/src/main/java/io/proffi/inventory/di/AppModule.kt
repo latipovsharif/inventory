@@ -3,6 +3,7 @@ package io.proffi.inventory.di
 import io.proffi.inventory.data.*
 import io.proffi.inventory.network.AuthInterceptor
 import io.proffi.inventory.network.RetrofitClient
+import io.proffi.inventory.ui.assembly.AssemblyViewModel
 import io.proffi.inventory.ui.inventory.InventoryViewModel
 import io.proffi.inventory.ui.login.LoginViewModel
 import io.proffi.inventory.ui.productmove.ProductMoveViewModel
@@ -17,7 +18,6 @@ val appModule = module {
     // TokenManager
     single { TokenManager(androidContext()) }
 
-
     // Network
     single { AuthInterceptor(get()) }
     single { RetrofitClient.create(get()) }
@@ -27,6 +27,7 @@ val appModule = module {
     single { WarehouseRepository(get()) }
     single { InventoryRepository(get()) }
     single { ProductMoveRepository(get()) }
+    single { AssemblyRepository(get()) }
 
     // ViewModels
     viewModelOf(::LoginViewModel)
@@ -35,4 +36,5 @@ val appModule = module {
     viewModelOf(::ScannerViewModel)
     viewModelOf(::ProductMoveViewModel)
     viewModelOf(::ProductReceiveViewModel)
+    viewModelOf(::AssemblyViewModel)
 }

@@ -58,6 +58,10 @@ class MainActivity : BaseActivity() {
                         // Открыть экран приёмки товара
                         startActivity(Intent(activity, io.proffi.inventory.ui.productreceive.ProductReceiveSelectionActivity::class.java))
                     },
+                    onAssemblyClick = {
+                        // Открыть экран сборки товара
+                        startActivity(Intent(activity, io.proffi.inventory.ui.assembly.AssemblyListActivity::class.java))
+                    },
                     onSettingsClick = {
                         // Открыть экран настроек
                         startActivity(Intent(activity, io.proffi.inventory.ui.settings.SettingsActivity::class.java))
@@ -75,6 +79,7 @@ fun MainScreen(
     onInventoryClick: () -> Unit,
     onProductMoveClick: () -> Unit,
     onProductReceiveClick: () -> Unit,
+    onAssemblyClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -115,6 +120,12 @@ fun MainScreen(
                         scaffoldState.drawerState.close()
                     }
                     onProductReceiveClick()
+                },
+                onAssemblyClick = {
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                    onAssemblyClick()
                 },
                 onSettingsClick = {
                     scope.launch {
@@ -216,6 +227,7 @@ fun DrawerContent(
     onInventoryClick: () -> Unit,
     onProductMoveClick: () -> Unit,
     onProductReceiveClick: () -> Unit,
+    onAssemblyClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onLogout: () -> Unit
 ) {
@@ -276,6 +288,13 @@ fun DrawerContent(
             icon = Icons.Default.Inbox,
             text = stringResource(R.string.menu_product_receive),
             onClick = onProductReceiveClick
+        )
+
+        // Пункт меню: Сборка товара
+        DrawerMenuItem(
+            icon = Icons.Default.Inventory2,
+            text = stringResource(R.string.menu_assembly),
+            onClick = onAssemblyClick
         )
 
         // Пункт меню: Склады

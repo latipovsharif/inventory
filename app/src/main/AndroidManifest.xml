@@ -83,6 +83,21 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name="io.proffi.inventory.ui.assembly.AssemblyListActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="io.proffi.inventory.ui.assembly.AssemblyDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="io.proffi.inventory.ui.assembly.AssemblyScannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             tools:replace="screenOrientation" />

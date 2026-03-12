@@ -30,7 +30,7 @@ object SdkLibraryConfig {
         SdkConfig(
             scannerType = ScannerType.UROVO_I6310,
             libraryFileName = "UROVO_i6310.jdk",
-            downloadUrl = "${BASE_SDK_URL}/UROVO_i6310.jdk",
+            downloadUrl = "${BASE_SDK_URL}/UROVO_i6310.jar",
             version = "2.0.0",
         )
     )

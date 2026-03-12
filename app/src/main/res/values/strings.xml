@@ -184,4 +184,20 @@
     <string name="product_receive_status_label">Статус: %s</string>
     <string name="product_receive_date_label">Дата: %s</string>
     <string name="product_receive_select_move">Выберите перемещение для приёмки</string>
+
+    <!-- Assembly (Picking) Screen -->
+    <string name="menu_assembly">Сборка товара</string>
+    <string name="assembly_list_title">Рекомендации по сборке</string>
+    <string name="assembly_detail_title">Детали рекомендации</string>
+    <string name="assembly_scanner_title">Сборка товара</string>
+    <string name="assembly_start_button">Начать сборку</string>
+    <string name="assembly_positions_title">Позиции (%d)</string>
+    <string name="assembly_scan_box_prompt">Сканируйте коробку</string>
+    <string name="assembly_scan_product_prompt">Сканируйте товар • %s</string>
+    <string name="assembly_change_box">Сменить</string>
+    <string name="assembly_box_not_found">Коробка не найдена в задании</string>
+    <string name="assembly_product_not_found">Товар не найден в задании</string>
+    <string name="assembly_empty">Нет доступных рекомендаций</string>
+    <string name="assembly_error_loading">Ошибка загрузки: %s</string>
+    <string name="assembly_products_count">%d поз. • %d шт.</string>
 </resources>

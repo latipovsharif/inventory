@@ -57,6 +57,19 @@ interface ApiService {
 
     @POST("api/v1/warehouses/product-move/{id}/confirm-receive")
     suspend fun confirmReceiveProductMove(@Path("id") moveId: String): CompleteProductMoveResponse
+
+    // Assembly (picking) endpoints
+    @GET("api/v1/warehouses/recommendations")
+    suspend fun getRecommendations(@Query("page") page: Int): RecommendationsListResponse
+
+    @GET("api/v1/warehouses/recommendations/{id}")
+    suspend fun getRecommendationDetail(@Path("id") id: String): RecommendationDetail
+
+    @POST("api/v1/warehouses/recommendations/{id}/collect")
+    suspend fun collectProduct(
+        @Path("id") id: String,
+        @Body request: CollectRequest
+    ): RecommendationDetail
 }
 
 // Request/Response models
@@ -350,5 +363,88 @@ data class ScanProductMoveBody(
 data class CompleteProductMoveResponse(
     val status: Int,
     val message: String
+)
+
+// Assembly (Picking) models
+data class RecommendationsListResponse(
+    @SerializedName("page_count")
+    val pageCount: Int,
+    @SerializedName("total_items")
+    val totalItems: Int,
+    @SerializedName("item_per_page")
+    val itemPerPage: Int,
+    val body: List<Recommendation>
+)
+
+data class Recommendation(
+    val id: String,
+    @SerializedName("from_warehouse")
+    val fromWarehouse: WarehouseInfo,
+    @SerializedName("to_warehouse")
+    val toWarehouse: WarehouseInfo,
+    val status: String,
+    val notes: String?,
+    @SerializedName("created_by")
+    val createdBy: UserInfo,
+    @SerializedName("created_at")
+    val createdAt: String,
+    @SerializedName("total_products")
+    val totalProducts: Int,
+    @SerializedName("total_requested")
+    val totalRequested: Int
+)
+
+data class RecommendationDetail(
+    val id: String,
+    @SerializedName("from_warehouse")
+    val fromWarehouse: WarehouseInfo,
+    @SerializedName("to_warehouse")
+    val toWarehouse: WarehouseInfo,
+    val status: String,
+    val notes: String?,
+    @SerializedName("created_by")
+    val createdBy: UserInfo,
+    @SerializedName("created_at")
+    val createdAt: String,
+    val details: List<RecommendationDetailItem>
+)
+
+data class RecommendationDetailItem(
+    val id: String,
+    val product: RecommendationProduct,
+    @SerializedName("requested_quantity")
+    val requestedQuantity: Int,
+    @SerializedName("collected_quantity")
+    val collectedQuantity: Int?,
+    val locations: List<RecommendationLocation>
+)
+
+data class RecommendationProduct(
+    val id: String,
+    val name: String,
+    val barcode: String,
+    val article: String
+)
+
+data class RecommendationLocation(
+    val id: String,
+    val quantity: Int,
+    val box: LocationItem,
+    val shelf: LocationItem,
+    val zone: LocationItem
+)
+
+data class LocationItem(
+    val id: String,
+    val name: String,
+    val code: String
+)
+
+data class CollectRequest(
+    @SerializedName("box_id")
+    val boxId: String,
+    @SerializedName("product_id")
+    val productId: String,
+    val quantity: Double
 )
 
