@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,9 @@ class ScannerActivity : BaseActivity(), ScannerCallback {
     private var inventoryId: String = ""
     private lateinit var scannerManager: ScannerManager
     private lateinit var scannerPreferences: ScannerPreferences
-    private var currentScannerType: ScannerType = ScannerType.CAMERA
+
+    // Реактивный тип сканера — Compose перерисуется при изменении
+    private var currentScannerType by mutableStateOf(ScannerType.CAMERA)
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -94,6 +97,22 @@ class ScannerActivity : BaseActivity(), ScannerCallback {
                     onScanClick = { checkCameraPermissionAndScan() }
                 )
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Восстанавливаем Urovo-сканер после возврата из фона
+        if (currentScannerType == ScannerType.UROVO_I6310) {
+            scannerManager.getCurrentScanner()?.startScan()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Останавливаем Urovo-сканер при уходе в фон
+        if (currentScannerType == ScannerType.UROVO_I6310) {
+            scannerManager.getCurrentScanner()?.stopScan()
         }
     }
 
@@ -177,6 +196,38 @@ fun ScannerScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // SDK-баннер для ТСД (Urovo и подобных) — во всю ширину поверх содержимого
+            if (currentScannerType == ScannerType.UROVO_I6310) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colors.primary,
+                    elevation = 6.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = stringResource(R.string.scanner_sdk_active_banner),
+                            color = Color.White,
+                            style = MaterialTheme.typography.subtitle1
+                        )
+                    }
+                }
+                if (scanState is ScanState.Loading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+            }
+
             // Верхняя часть с формой сканирования
             Column(
                 modifier = Modifier
@@ -201,65 +252,68 @@ fun ScannerScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                // Поля ввода показываем только для режима камеры
+                if (currentScannerType != ScannerType.UROVO_I6310) {
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                OutlinedTextField(
-                    value = barcode,
-                    onValueChange = { barcode = it },
-                    label = { Text(stringResource(R.string.scanner_barcode_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    trailingIcon = {
-                        IconButton(onClick = onScanClick) {
-                            Icon(Icons.Default.QrCodeScanner, contentDescription = stringResource(R.string.cd_scan))
-                        }
-                    },
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = quantity,
-                    onValueChange = {
-                        // Разрешаем цифры и одну точку для дробных значений
-                        if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                            quantity = it
-                        }
-                    },
-                    label = { Text(stringResource(R.string.scanner_quantity_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        val qty = quantity.toDoubleOrNull() ?: 1.0
-                        viewModel.scanBarcode(inventoryId, barcode, qty)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = barcode.isNotBlank() &&
-                             quantity.isNotBlank() &&
-                             scanState !is ScanState.Loading,
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.elevation(
-                        defaultElevation = 4.dp,
-                        pressedElevation = 8.dp
+                    OutlinedTextField(
+                        value = barcode,
+                        onValueChange = { barcode = it },
+                        label = { Text(stringResource(R.string.scanner_barcode_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        trailingIcon = {
+                            IconButton(onClick = onScanClick) {
+                                Icon(Icons.Default.QrCodeScanner, contentDescription = stringResource(R.string.cd_scan))
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp)
                     )
-                ) {
-                    if (scanState is ScanState.Loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colors.onPrimary
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = quantity,
+                        onValueChange = {
+                            // Разрешаем цифры и одну точку для дробных значений
+                            if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
+                                quantity = it
+                            }
+                        },
+                        label = { Text(stringResource(R.string.scanner_quantity_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            val qty = quantity.toDoubleOrNull() ?: 1.0
+                            viewModel.scanBarcode(inventoryId, barcode, qty)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        enabled = barcode.isNotBlank() &&
+                                 quantity.isNotBlank() &&
+                                 scanState !is ScanState.Loading,
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = ButtonDefaults.elevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 8.dp
                         )
-                    } else {
-                        Text(stringResource(R.string.scanner_send_button))
+                    ) {
+                        if (scanState is ScanState.Loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colors.onPrimary
+                            )
+                        } else {
+                            Text(stringResource(R.string.scanner_send_button))
+                        }
                     }
                 }
 

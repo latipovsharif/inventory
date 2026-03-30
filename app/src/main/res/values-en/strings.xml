@@ -47,6 +47,7 @@
     <string name="scanner_edit_ok">OK</string>
     <string name="scanner_prompt">Scan barcode</string>
     <string name="scanner_scanned_toast">Scanned: %s</string>
+    <string name="scanner_sdk_active_banner">PDA scanner active — scan a barcode</string>
 
     <!-- Common -->
     <string name="back">Back</string>
@@ -185,4 +186,37 @@
     <string name="product_receive_status_label">Status: %s</string>
     <string name="product_receive_date_label">Date: %s</string>
     <string name="product_receive_select_move">Select transfer to receive</string>
+
+    <!-- Assembly (Picking) Screen -->
+    <string name="menu_assembly">Product Assembly</string>
+    <string name="assembly_list_title">Assembly Recommendations</string>
+    <string name="assembly_detail_title">Recommendation Details</string>
+    <string name="assembly_scanner_title">Product Assembly</string>
+    <string name="assembly_start_button">Start Assembly</string>
+    <string name="assembly_positions_title">Positions (%d)</string>
+    <string name="assembly_scan_box_prompt">Scan box</string>
+    <string name="assembly_scan_product_prompt">Scan product • %s</string>
+    <string name="assembly_change_box">Change</string>
+    <string name="assembly_box_not_found">Box not found in task</string>
+    <string name="assembly_product_not_found">Product not found in task</string>
+    <string name="assembly_empty">No recommendations available</string>
+    <string name="assembly_error_loading">Loading error: %s</string>
+    <string name="assembly_products_count">%d pos. • %d pcs.</string>
+
+    <!-- Packing Screen -->
+    <string name="menu_packing">Product Packing</string>
+    <string name="packing_list_title">Packing Tasks</string>
+    <string name="packing_detail_title">Packing Details</string>
+    <string name="packing_scanner_title">Product Packing</string>
+    <string name="packing_start_button">Start Packing</string>
+    <string name="packing_empty">No packing tasks</string>
+    <string name="packing_error_loading">Loading error: %s</string>
+    <string name="packing_items_title">Items (%d)</string>
+    <string name="packing_packed_items_title">Packed items (%d)</string>
+    <string name="packing_positions_count">%d pos. • %d pcs.</string>
+    <string name="packing_box_label">Box: %s</string>
+    <string name="packing_scan_box_prompt">Scan the packing box</string>
+    <string name="packing_manual_box_hint">Enter box code manually</string>
+    <string name="packing_scan_product_prompt">Scan product • Box: %s</string>
+    <string name="packing_change_box">Change box</string>
 </resources>

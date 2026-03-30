@@ -98,6 +98,21 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name="io.proffi.inventory.ui.packing.PackingListActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="io.proffi.inventory.ui.packing.PackingDetailActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="io.proffi.inventory.ui.packing.PackingScannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             tools:replace="screenOrientation" />

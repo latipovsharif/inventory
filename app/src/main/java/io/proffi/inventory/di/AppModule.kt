@@ -6,6 +6,7 @@ import io.proffi.inventory.network.RetrofitClient
 import io.proffi.inventory.ui.assembly.AssemblyViewModel
 import io.proffi.inventory.ui.inventory.InventoryViewModel
 import io.proffi.inventory.ui.login.LoginViewModel
+import io.proffi.inventory.ui.packing.PackingViewModel
 import io.proffi.inventory.ui.productmove.ProductMoveViewModel
 import io.proffi.inventory.ui.productreceive.ProductReceiveViewModel
 import io.proffi.inventory.ui.scanner.ScannerViewModel
@@ -28,6 +29,7 @@ val appModule = module {
     single { InventoryRepository(get()) }
     single { ProductMoveRepository(get()) }
     single { AssemblyRepository(get()) }
+    single { PackingRepository(get()) }
 
     // ViewModels
     viewModelOf(::LoginViewModel)
@@ -37,4 +39,5 @@ val appModule = module {
     viewModelOf(::ProductMoveViewModel)
     viewModelOf(::ProductReceiveViewModel)
     viewModelOf(::AssemblyViewModel)
+    viewModelOf(::PackingViewModel)
 }

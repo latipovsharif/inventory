@@ -62,6 +62,10 @@ class MainActivity : BaseActivity() {
                         // Открыть экран сборки товара
                         startActivity(Intent(activity, io.proffi.inventory.ui.assembly.AssemblyListActivity::class.java))
                     },
+                    onPackingClick = {
+                        // Открыть экран упаковки товара
+                        startActivity(Intent(activity, io.proffi.inventory.ui.packing.PackingListActivity::class.java))
+                    },
                     onSettingsClick = {
                         // Открыть экран настроек
                         startActivity(Intent(activity, io.proffi.inventory.ui.settings.SettingsActivity::class.java))
@@ -80,6 +84,7 @@ fun MainScreen(
     onProductMoveClick: () -> Unit,
     onProductReceiveClick: () -> Unit,
     onAssemblyClick: () -> Unit,
+    onPackingClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -104,39 +109,31 @@ fun MainScreen(
         drawerContent = {
             DrawerContent(
                 onInventoryClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.close()
-                    }
+                    scope.launch { scaffoldState.drawerState.close() }
                     onInventoryClick()
                 },
                 onProductMoveClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.close()
-                    }
+                    scope.launch { scaffoldState.drawerState.close() }
                     onProductMoveClick()
                 },
                 onProductReceiveClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.close()
-                    }
+                    scope.launch { scaffoldState.drawerState.close() }
                     onProductReceiveClick()
                 },
                 onAssemblyClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.close()
-                    }
+                    scope.launch { scaffoldState.drawerState.close() }
                     onAssemblyClick()
                 },
+                onPackingClick = {
+                    scope.launch { scaffoldState.drawerState.close() }
+                    onPackingClick()
+                },
                 onSettingsClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.close()
-                    }
+                    scope.launch { scaffoldState.drawerState.close() }
                     onSettingsClick()
                 },
                 onLogout = {
-                    scope.launch {
-                        scaffoldState.drawerState.close()
-                    }
+                    scope.launch { scaffoldState.drawerState.close() }
                     onLogout()
                 }
             )
@@ -228,6 +225,7 @@ fun DrawerContent(
     onProductMoveClick: () -> Unit,
     onProductReceiveClick: () -> Unit,
     onAssemblyClick: () -> Unit,
+    onPackingClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onLogout: () -> Unit
 ) {
@@ -295,6 +293,13 @@ fun DrawerContent(
             icon = Icons.Default.Inventory2,
             text = stringResource(R.string.menu_assembly),
             onClick = onAssemblyClick
+        )
+
+        // Пункт меню: Упаковка товара
+        DrawerMenuItem(
+            icon = Icons.Default.MoveToInbox,
+            text = stringResource(R.string.menu_packing),
+            onClick = onPackingClick
         )
 
         // Пункт меню: Склады

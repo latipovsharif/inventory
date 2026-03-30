@@ -62,6 +62,12 @@ interface ApiService {
     @GET("api/v1/warehouses/recommendations")
     suspend fun getRecommendations(@Query("page") page: Int): RecommendationsListResponse
 
+    @GET("api/v1/warehouses/recommendations")
+    suspend fun getRecommendationsFiltered(
+        @Query("page") page: Int,
+        @Query("status") status: String
+    ): RecommendationsListResponse
+
     @GET("api/v1/warehouses/recommendations/{id}")
     suspend fun getRecommendationDetail(@Path("id") id: String): RecommendationDetail
 
@@ -69,6 +75,13 @@ interface ApiService {
     suspend fun collectProduct(
         @Path("id") id: String,
         @Body request: CollectRequest
+    ): RecommendationDetail
+
+    // Packing endpoint
+    @POST("api/v1/warehouses/recommendations/{id}/pack")
+    suspend fun packProduct(
+        @Path("id") id: String,
+        @Body request: PackProductRequest
     ): RecommendationDetail
 }
 
@@ -406,7 +419,26 @@ data class RecommendationDetail(
     val createdBy: UserInfo,
     @SerializedName("created_at")
     val createdAt: String,
-    val details: List<RecommendationDetailItem>
+    val details: List<RecommendationDetailItem>,
+    @SerializedName("pack_items")
+    val packItems: List<PackItem>? = null
+)
+
+data class PackItem(
+    val id: String,
+    val product: RecommendationProduct,
+    val quantity: Int,
+    @SerializedName("box_code")
+    val boxCode: String,
+    @SerializedName("item_barcode")
+    val itemBarcode: String
+)
+
+data class PackProductRequest(
+    @SerializedName("box_code")
+    val boxCode: String,
+    val barcode: String,
+    val quantity: Int
 )
 
 data class RecommendationDetailItem(

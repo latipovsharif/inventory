@@ -46,6 +46,7 @@
     <string name="scanner_edit_ok">ОК</string>
     <string name="scanner_prompt">Сканируйте штрихкод</string>
     <string name="scanner_scanned_toast">Отсканирован: %s</string>
+    <string name="scanner_sdk_active_banner">ТСД активен — поднесите штрихкод к сканеру</string>
 
     <!-- Common -->
     <string name="back">Назад</string>
@@ -200,4 +201,21 @@
     <string name="assembly_empty">Нет доступных рекомендаций</string>
     <string name="assembly_error_loading">Ошибка загрузки: %s</string>
     <string name="assembly_products_count">%d поз. • %d шт.</string>
+
+    <!-- Packing Screen -->
+    <string name="menu_packing">Упаковка товара</string>
+    <string name="packing_list_title">Задания на упаковку</string>
+    <string name="packing_detail_title">Детали упаковки</string>
+    <string name="packing_scanner_title">Упаковка товара</string>
+    <string name="packing_start_button">Начать упаковку</string>
+    <string name="packing_empty">Нет заданий на упаковку</string>
+    <string name="packing_error_loading">Ошибка загрузки: %s</string>
+    <string name="packing_items_title">Позиции (%d)</string>
+    <string name="packing_packed_items_title">Упакованные товары (%d)</string>
+    <string name="packing_positions_count">%d поз. • %d шт.</string>
+    <string name="packing_box_label">Короб: %s</string>
+    <string name="packing_scan_box_prompt">Сканируйте коробку для упаковки</string>
+    <string name="packing_manual_box_hint">Введите код коробки вручную</string>
+    <string name="packing_scan_product_prompt">Сканируйте товар • Коробка: %s</string>
+    <string name="packing_change_box">Сменить коробку</string>
 </resources>
