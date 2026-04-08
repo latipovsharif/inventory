@@ -46,7 +46,7 @@ class AssemblyViewModel(
     }
 
     private suspend fun fetchPage(page: Int) {
-        val result = assemblyRepository.getRecommendations(page)
+        val result = assemblyRepository.getRecommendations(page, status = "collecting")
         if (result.isSuccess) {
             val response = result.getOrNull()!!
             totalItems = response.totalItems

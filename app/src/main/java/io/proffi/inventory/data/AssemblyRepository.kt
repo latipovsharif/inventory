@@ -8,9 +8,13 @@ import io.proffi.inventory.network.RecommendationsListResponse
 
 class AssemblyRepository(private val apiService: ApiService) {
 
-    suspend fun getRecommendations(page: Int): Result<RecommendationsListResponse> {
+    suspend fun getRecommendations(page: Int, status: String? = null): Result<RecommendationsListResponse> {
         return try {
-            val response = apiService.getRecommendations(page)
+            val response = if (status != null) {
+                apiService.getRecommendationsFiltered(page, status)
+            } else {
+                apiService.getRecommendations(page)
+            }
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
