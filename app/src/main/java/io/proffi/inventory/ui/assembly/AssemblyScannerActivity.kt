@@ -165,28 +165,26 @@ fun AssemblyScannerScreen(
     val scaffoldState = rememberScaffoldState()
     val listState = rememberLazyListState()
 
-    // Excess-product dialog state
-    var showExcessDialog by remember { mutableStateOf(false) }
-    var excessProductName by remember { mutableStateOf("") }
+    // Excess-product dialog — derived directly from collectState (single source of truth)
+    val showExcessDialog = collectState is CollectState.ExcessProduct
+    val excessProductName = (collectState as? CollectState.ExcessProduct)?.productName ?: ""
+
+    // Hoist string resources so they can be used inside LaunchedEffect
+    val msgBoxNotFound = stringResource(R.string.assembly_box_not_found)
+    val msgProductNotFound = stringResource(R.string.assembly_product_not_found)
 
     // Handle collect state side-effects
     LaunchedEffect(collectState) {
         when (collectState) {
             is CollectState.ExcessProduct -> {
-                excessProductName = (collectState as CollectState.ExcessProduct).productName
-                showExcessDialog = true
-                // resetCollectState() called when user taps OK
+                // Dialog shown automatically via showExcessDialog derived state
             }
             is CollectState.BoxNotFound -> {
-                scaffoldState.snackbarHostState.showSnackbar(
-                    message = "Коробка не найдена в задании"
-                )
+                scaffoldState.snackbarHostState.showSnackbar(message = msgBoxNotFound)
                 viewModel.resetCollectState()
             }
             is CollectState.ProductNotFound -> {
-                scaffoldState.snackbarHostState.showSnackbar(
-                    message = "Товар не найден в задании"
-                )
+                scaffoldState.snackbarHostState.showSnackbar(message = msgProductNotFound)
                 viewModel.resetCollectState()
             }
             is CollectState.Error -> {
@@ -206,16 +204,13 @@ fun AssemblyScannerScreen(
     if (showExcessDialog) {
         AlertDialog(
             onDismissRequest = { /* force user to press OK */ },
-            title = { Text("Лишний товар") },
+            title = { Text(stringResource(R.string.assembly_excess_title)) },
             text = {
-                Text("Товар «$excessProductName» уже собран в необходимом количестве. Данный товар является лишним.")
+                Text(stringResource(R.string.assembly_excess_message, excessProductName))
             },
             confirmButton = {
-                Button(onClick = {
-                    showExcessDialog = false
-                    viewModel.resetCollectState()
-                }) {
-                    Text("ОК")
+                Button(onClick = { viewModel.resetCollectState() }) {
+                    Text(stringResource(R.string.assembly_excess_ok))
                 }
             }
         )
@@ -417,12 +412,12 @@ private fun ScannerItemCard(
                         color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
                     )
                     Text(
-                        text = "Арт: ${item.product.article}",
+                        text = stringResource(R.string.item_article_label, item.product.article),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
                     )
                     Text(
-                        text = "Штрихкод: ${item.product.barcode}",
+                        text = stringResource(R.string.item_barcode_label, item.product.barcode),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
                     )
@@ -449,7 +444,7 @@ private fun ScannerItemCard(
                         )
                     }
                     Text(
-                        text = "шт.",
+                        text = stringResource(R.string.item_quantity_unit),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
                     )
@@ -490,7 +485,7 @@ private fun ScannerItemCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Местоположение:",
+                        text = stringResource(R.string.item_location_label),
                         style = MaterialTheme.typography.caption,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colors.primary
@@ -509,7 +504,7 @@ private fun ScannerItemCard(
                         // Zone
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Зона:",
+                                text = stringResource(R.string.item_zone_label),
                                 style = MaterialTheme.typography.caption,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
                             )
@@ -535,7 +530,7 @@ private fun ScannerItemCard(
                             modifier = Modifier.padding(start = 12.dp)
                         ) {
                             Text(
-                                text = "Стеллаж:",
+                                text = stringResource(R.string.item_shelf_label),
                                 style = MaterialTheme.typography.caption,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
                             )
@@ -561,7 +556,7 @@ private fun ScannerItemCard(
                             modifier = Modifier.padding(start = 24.dp)
                         ) {
                             Text(
-                                text = "Коробка:",
+                                text = stringResource(R.string.item_box_scan_label),
                                 style = MaterialTheme.typography.caption,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
                             )
@@ -590,7 +585,7 @@ private fun ScannerItemCard(
                             }
                             Spacer(modifier = Modifier.weight(1f))
                             Text(
-                                text = "${location.quantity} шт.",
+                                text = stringResource(R.string.item_location_qty, location.quantity),
                                 style = MaterialTheme.typography.caption,
                                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                             )

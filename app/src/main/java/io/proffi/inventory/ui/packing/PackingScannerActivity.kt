@@ -415,12 +415,12 @@ private fun ScannerDetailItemCard(
                         color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
                     )
                     Text(
-                        "Арт: ${item.product.article}",
+                        stringResource(R.string.item_article_label, item.product.article),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
                     )
                     Text(
-                        "Штрихкод: ${item.product.barcode}",
+                        stringResource(R.string.item_barcode_label, item.product.barcode),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
                     )
@@ -449,13 +449,13 @@ private fun ScannerDetailItemCard(
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    "Собрано:",
+                    stringResource(R.string.packing_collected_label),
                     style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    "$collected / $requested шт.",
+                    stringResource(R.string.item_qty_of_display, collected, requested),
                     style = MaterialTheme.typography.caption,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isCollectedDone) Color(0xFF4CAF50)
@@ -479,13 +479,13 @@ private fun ScannerDetailItemCard(
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    "Упаковано:",
+                    stringResource(R.string.packing_packed_label),
                     style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    "$packedQuantity / $requested шт.",
+                    stringResource(R.string.item_qty_of_display, packedQuantity, requested),
                     style = MaterialTheme.typography.caption,
                     fontWeight = FontWeight.Bold,
                     color = when {
