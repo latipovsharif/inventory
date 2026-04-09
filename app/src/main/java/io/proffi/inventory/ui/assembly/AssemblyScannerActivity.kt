@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -160,11 +161,22 @@ fun AssemblyScannerScreen(
     val detailState by viewModel.detailState.collectAsState()
     val scanPhase by viewModel.scanPhase.collectAsState()
     val collectState by viewModel.collectState.collectAsState()
+    val lastScannedProductId by viewModel.lastScannedProductId.collectAsState()
     val scaffoldState = rememberScaffoldState()
+    val listState = rememberLazyListState()
 
-    // Handle error messages via Snackbar
+    // Excess-product dialog state
+    var showExcessDialog by remember { mutableStateOf(false) }
+    var excessProductName by remember { mutableStateOf("") }
+
+    // Handle collect state side-effects
     LaunchedEffect(collectState) {
         when (collectState) {
+            is CollectState.ExcessProduct -> {
+                excessProductName = (collectState as CollectState.ExcessProduct).productName
+                showExcessDialog = true
+                // resetCollectState() called when user taps OK
+            }
             is CollectState.BoxNotFound -> {
                 scaffoldState.snackbarHostState.showSnackbar(
                     message = "Коробка не найдена в задании"
@@ -188,6 +200,25 @@ fun AssemblyScannerScreen(
             }
             else -> {}
         }
+    }
+
+    // Excess-product AlertDialog
+    if (showExcessDialog) {
+        AlertDialog(
+            onDismissRequest = { /* force user to press OK */ },
+            title = { Text("Лишний товар") },
+            text = {
+                Text("Товар «$excessProductName» уже собран в необходимом количестве. Данный товар является лишним.")
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showExcessDialog = false
+                    viewModel.resetCollectState()
+                }) {
+                    Text("ОК")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -241,7 +272,7 @@ fun AssemblyScannerScreen(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-            // ── Items list — weight(1f) ensures correct height in Column ──────
+            // ── Items list ────────────────────────────────────────────────────
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 when (val state = detailState) {
                     is DetailState.Loading -> {
@@ -264,12 +295,25 @@ fun AssemblyScannerScreen(
 
                     is DetailState.Success -> {
                         val isBoxScanned = scanPhase is ScanPhase.BoxScanned
+                        // Show only items that are not yet fully collected
+                        val visibleItems = state.detail.details.filter {
+                            (it.collectedQuantity ?: 0) < it.requestedQuantity
+                        }
+
+                        // Auto-scroll to the last scanned product
+                        LaunchedEffect(lastScannedProductId) {
+                            val id = lastScannedProductId ?: return@LaunchedEffect
+                            val index = visibleItems.indexOfFirst { it.product.id == id }
+                            if (index >= 0) listState.animateScrollToItem(index)
+                        }
+
                         LazyColumn(
+                            state = listState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(state.detail.details) { item ->
+                            items(visibleItems, key = { it.id }) { item ->
                                 ScannerItemCard(
                                     item = item,
                                     isActive = isBoxScanned

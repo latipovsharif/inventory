@@ -234,7 +234,14 @@ fun PackingScannerScreen(
                         ) {
                             // Items to pack
                             items(state.detail.details) { item ->
-                                ScannerDetailItemCard(item = item, isActive = isBoxScanned)
+                                val packedQty = packItems
+                                    .filter { it.product.id == item.product.id }
+                                    .sumOf { it.quantity }
+                                ScannerDetailItemCard(
+                                    item = item,
+                                    isActive = isBoxScanned,
+                                    packedQuantity = packedQty
+                                )
                             }
                             // Already packed items
                             if (packItems.isNotEmpty()) {
@@ -380,52 +387,122 @@ private fun PackPhaseBanner(
 }
 
 @Composable
-private fun ScannerDetailItemCard(item: RecommendationDetailItem, isActive: Boolean) {
+private fun ScannerDetailItemCard(
+    item: RecommendationDetailItem,
+    isActive: Boolean,
+    packedQuantity: Int = 0
+) {
     val collected = item.collectedQuantity ?: 0
-    val isDone = collected >= item.requestedQuantity
-    val alpha = if (isActive || isDone) 1f else 0.65f
+    val requested = item.requestedQuantity
+    val isPackingDone = packedQuantity >= requested
+    val isCollectedDone = collected >= requested
+    val alpha = if (isActive || isPackingDone) 1f else 0.65f
 
-    Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp,
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 2.dp,
         shape = RoundedCornerShape(10.dp),
-        backgroundColor = if (isDone) Color(0xFFE8F5E9) else MaterialTheme.colors.surface) {
+        backgroundColor = if (isPackingDone) Color(0xFFE8F5E9) else MaterialTheme.colors.surface
+    ) {
         Column(Modifier.padding(12.dp)) {
+            // ── Header row ────────────────────────────────────────────────────
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(item.product.name, style = MaterialTheme.typography.subtitle1,
+                    Text(
+                        item.product.name,
+                        style = MaterialTheme.typography.subtitle1,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha))
-                    Text("Арт: ${item.product.article}", style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f))
-                    Text("Штрихкод: ${item.product.barcode}", style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f))
+                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
+                    )
+                    Text(
+                        "Арт: ${item.product.article}",
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
+                    )
+                    Text(
+                        "Штрихкод: ${item.product.barcode}",
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
+                    )
                 }
                 Spacer(Modifier.width(8.dp))
-                Column(horizontalAlignment = Alignment.End) {
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text("$collected", style = MaterialTheme.typography.h6,
-                            fontWeight = FontWeight.Bold,
-                            color = when {
-                                isDone -> Color(0xFF4CAF50)
-                                isActive -> MaterialTheme.colors.primary
-                                else -> MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
-                            })
-                        Text("/${item.requestedQuantity}", style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
-                    }
-                    Text("шт.", style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f))
-                }
-                if (isDone) {
-                    Spacer(Modifier.width(4.dp))
-                    Icon(Icons.Default.CheckCircle, null,
-                        tint = Color(0xFF4CAF50), modifier = Modifier.size(22.dp))
+                if (isPackingDone) {
+                    Icon(
+                        Icons.Default.CheckCircle, null,
+                        tint = Color(0xFF4CAF50), modifier = Modifier.size(22.dp)
+                    )
                 }
             }
+
+            Spacer(Modifier.height(8.dp))
+
+            // ── Collected row ─────────────────────────────────────────────────
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Default.Inventory2, null,
+                    tint = if (isCollectedDone) Color(0xFF4CAF50)
+                    else MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    "Собрано:",
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    "$collected / $requested шт.",
+                    style = MaterialTheme.typography.caption,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isCollectedDone) Color(0xFF4CAF50)
+                    else MaterialTheme.colors.onSurface.copy(alpha = alpha)
+                )
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // ── Packed row ────────────────────────────────────────────────────
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Default.MoveToInbox, null,
+                    tint = if (isPackingDone) Color(0xFF4CAF50)
+                    else if (isActive) MaterialTheme.colors.primary
+                    else MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    "Упаковано:",
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    "$packedQuantity / $requested шт.",
+                    style = MaterialTheme.typography.caption,
+                    fontWeight = FontWeight.Bold,
+                    color = when {
+                        isPackingDone -> Color(0xFF4CAF50)
+                        isActive -> MaterialTheme.colors.primary
+                        else -> MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                    }
+                )
+            }
+
             Spacer(Modifier.height(6.dp))
+
+            // ── Progress bar (based on packed quantity) ───────────────────────
             LinearProgressIndicator(
-                progress = (collected.toFloat() / item.requestedQuantity.toFloat()).coerceIn(0f, 1f),
+                progress = (packedQuantity.toFloat() / requested.toFloat()).coerceIn(0f, 1f),
                 modifier = Modifier.fillMaxWidth(),
-                color = if (isDone) Color(0xFF4CAF50) else MaterialTheme.colors.primary,
+                color = if (isPackingDone) Color(0xFF4CAF50) else MaterialTheme.colors.primary,
                 backgroundColor = MaterialTheme.colors.onSurface.copy(alpha = 0.1f)
             )
         }

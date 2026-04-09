@@ -386,7 +386,7 @@ data class RecommendationsListResponse(
     val totalItems: Int,
     @SerializedName("item_per_page")
     val itemPerPage: Int,
-    val body: List<Recommendation>
+    val body: List<Recommendation>? = null
 )
 
 data class Recommendation(

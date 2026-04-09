@@ -51,7 +51,7 @@ class PackingViewModel(
             val response = result.getOrNull()!!
             totalItems = response.totalItems
             currentPage = page
-            loadedItems.addAll(response.body)
+            loadedItems.addAll(response.body.orEmpty())
             val hasMore = loadedItems.size < totalItems
             _listState.value = PackingListState.Success(loadedItems.toList(), hasMore)
         } else {
