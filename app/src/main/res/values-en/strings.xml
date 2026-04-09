@@ -235,4 +235,10 @@
     <string name="packing_change_box">Change box</string>
     <string name="packing_collected_label">Collected:</string>
     <string name="packing_packed_label">Packed:</string>
+    <string name="packing_box_empty_hint">Scan a product to add to the box</string>
+    <string name="packing_in_box_qty">×%d pcs.</string>
+    <string name="packing_product_not_found">Product not found in task</string>
+    <string name="packing_excess_title">Excess Product</string>
+    <string name="packing_excess_message">Product «%s» is already packed in the required quantity. This item is excess.</string>
+    <string name="packing_excess_ok">OK</string>
 </resources>

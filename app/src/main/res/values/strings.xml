@@ -234,4 +234,10 @@
     <string name="packing_change_box">Сменить коробку</string>
     <string name="packing_collected_label">Собрано:</string>
     <string name="packing_packed_label">Упаковано:</string>
+    <string name="packing_box_empty_hint">Сканируйте товар для добавления в коробку</string>
+    <string name="packing_in_box_qty">×%d шт.</string>
+    <string name="packing_product_not_found">Товар не найден в задании</string>
+    <string name="packing_excess_title">Лишний товар</string>
+    <string name="packing_excess_message">Товар «%s» уже упакован в необходимом количестве. Данный товар является лишним.</string>
+    <string name="packing_excess_ok">ОК</string>
 </resources>
