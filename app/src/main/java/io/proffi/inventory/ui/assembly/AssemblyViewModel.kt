@@ -46,12 +46,12 @@ class AssemblyViewModel(
     }
 
     private suspend fun fetchPage(page: Int) {
-        val result = assemblyRepository.getRecommendations(page)
+        val result = assemblyRepository.getRecommendations(page, status = "collecting")
         if (result.isSuccess) {
             val response = result.getOrNull()!!
             totalItems = response.totalItems
             currentPage = page
-            loadedItems.addAll(response.body)
+            loadedItems.addAll(response.body.orEmpty())
             val hasMore = loadedItems.size < totalItems
             _recommendationsState.value = RecommendationsState.Success(loadedItems.toList(), hasMore)
         } else {
@@ -83,6 +83,9 @@ class AssemblyViewModel(
 
     private val _collectState = MutableStateFlow<CollectState>(CollectState.Idle)
     val collectState: StateFlow<CollectState> = _collectState
+
+    private val _lastScannedProductId = MutableStateFlow<String?>(null)
+    val lastScannedProductId: StateFlow<String?> = _lastScannedProductId
 
     fun resetScanPhase() {
         _scanPhase.value = ScanPhase.WaitingForBox
@@ -121,6 +124,12 @@ class AssemblyViewModel(
             _collectState.value = CollectState.ProductNotFound
             return
         }
+        // Check if the product is already fully collected → excess scan
+        val alreadyCollected = detailItem.collectedQuantity ?: 0
+        if (alreadyCollected >= detailItem.requestedQuantity) {
+            _collectState.value = CollectState.ExcessProduct(detailItem.product.name)
+            return
+        }
         viewModelScope.launch {
             _collectState.value = CollectState.Loading
             val result = assemblyRepository.collectProduct(
@@ -131,6 +140,7 @@ class AssemblyViewModel(
             )
             if (result.isSuccess) {
                 val updated = result.getOrNull()!!
+                _lastScannedProductId.value = detailItem.product.id
                 _detailState.value = DetailState.Success(updated)
                 _collectState.value = CollectState.Success(updated)
             } else {
@@ -175,6 +185,7 @@ sealed class CollectState {
     object Loading : CollectState()
     object BoxNotFound : CollectState()
     object ProductNotFound : CollectState()
+    data class ExcessProduct(val productName: String) : CollectState()
     data class Success(val updatedDetail: RecommendationDetail) : CollectState()
     data class Error(val message: String) : CollectState()
 }

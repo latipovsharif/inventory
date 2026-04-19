@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import io.proffi.inventory.R
-import io.proffi.inventory.network.PackItem
 import io.proffi.inventory.network.RecommendationDetailItem
 import io.proffi.inventory.scanner.*
 import io.proffi.inventory.ui.base.BaseActivity
@@ -152,10 +152,24 @@ fun PackingScannerScreen(
     val detailState by viewModel.detailState.collectAsState()
     val packPhase by viewModel.packPhase.collectAsState()
     val packState by viewModel.packState.collectAsState()
+    val lastScannedProductId by viewModel.lastScannedProductId.collectAsState()
     val scaffoldState = rememberScaffoldState()
+    val listState = rememberLazyListState()
+
+    // Excess-product dialog — derived from packState (single source of truth)
+    val showExcessDialog = packState is PackState.ExcessProduct
+    val excessProductName = (packState as? PackState.ExcessProduct)?.productName ?: ""
+
+    // Hoist string resources for use inside LaunchedEffect
+    val msgProductNotFound = stringResource(R.string.packing_product_not_found)
 
     LaunchedEffect(packState) {
         when (packState) {
+            is PackState.ExcessProduct -> { /* Dialog shown automatically */ }
+            is PackState.ProductNotFound -> {
+                scaffoldState.snackbarHostState.showSnackbar(message = msgProductNotFound)
+                viewModel.resetPackState()
+            }
             is PackState.Error -> {
                 scaffoldState.snackbarHostState.showSnackbar(
                     message = (packState as PackState.Error).message
@@ -167,6 +181,20 @@ fun PackingScannerScreen(
             }
             else -> {}
         }
+    }
+
+    // Excess-product AlertDialog
+    if (showExcessDialog) {
+        AlertDialog(
+            onDismissRequest = { /* force user to press OK */ },
+            title = { Text(stringResource(R.string.packing_excess_title)) },
+            text = { Text(stringResource(R.string.packing_excess_message, excessProductName)) },
+            confirmButton = {
+                Button(onClick = { viewModel.resetPackState() }) {
+                    Text(stringResource(R.string.packing_excess_ok))
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -226,29 +254,119 @@ fun PackingScannerScreen(
                     is PackingDetailState.Success -> {
                         val isBoxScanned = packPhase is PackPhase.BoxScanned
                         val packItems = state.detail.packItems ?: emptyList()
+                        val currentBoxCode = (packPhase as? PackPhase.BoxScanned)?.boxCode
+
+                        // Filter out fully packed items
+                        val visibleItems = state.detail.details.filter { item ->
+                            val packed = packItems
+                                .filter { it.product.id == item.product.id }
+                                .sumOf { it.quantity }
+                            packed < item.requestedQuantity
+                        }
+
+                        // Auto-scroll to last scanned product
+                        LaunchedEffect(lastScannedProductId) {
+                            val id = lastScannedProductId ?: return@LaunchedEffect
+                            val index = visibleItems.indexOfFirst { it.product.id == id }
+                            if (index >= 0) listState.animateScrollToItem(index)
+                        }
+
+                        // Items in current box grouped by product
+                        val currentBoxGroups = if (currentBoxCode != null) {
+                            packItems
+                                .filter { it.boxCode == currentBoxCode }
+                                .groupBy { it.product.id }
+                                .entries.toList()
+                        } else emptyList()
 
                         LazyColumn(
+                            state = listState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // Items to pack
-                            items(state.detail.details) { item ->
-                                ScannerDetailItemCard(item = item, isActive = isBoxScanned)
+                            // ── Visible positions (not fully packed) ──────────
+                            items(visibleItems, key = { it.id }) { item ->
+                                val packedQty = packItems
+                                    .filter { it.product.id == item.product.id }
+                                    .sumOf { it.quantity }
+                                ScannerDetailItemCard(
+                                    item = item,
+                                    isActive = isBoxScanned,
+                                    packedQuantity = packedQty
+                                )
                             }
-                            // Already packed items
-                            if (packItems.isNotEmpty()) {
-                                item {
-                                    Text(
-                                        stringResource(R.string.packing_packed_items_title, packItems.size),
-                                        style = MaterialTheme.typography.caption,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF388E3C),
-                                        modifier = Modifier.padding(top = 8.dp)
-                                    )
+
+                            // ── Current box section ───────────────────────────
+                            if (currentBoxCode != null) {
+                                item(key = "box_header") {
+                                    Spacer(Modifier.height(4.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Divider(
+                                            modifier = Modifier.weight(1f),
+                                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = Color(0xFF388E3C)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Inventory2, null,
+                                                    tint = Color.White,
+                                                    modifier = Modifier.size(14.dp)
+                                                )
+                                                Spacer(Modifier.width(4.dp))
+                                                Text(
+                                                    stringResource(R.string.packing_box_label, currentBoxCode),
+                                                    style = MaterialTheme.typography.caption,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                            }
+                                        }
+                                        Spacer(Modifier.width(8.dp))
+                                        Divider(
+                                            modifier = Modifier.weight(1f),
+                                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+                                        )
+                                    }
+                                    Spacer(Modifier.height(4.dp))
                                 }
-                                items(packItems) { packItem ->
-                                    ScannerPackedItemRow(packItem)
+
+                                if (currentBoxGroups.isEmpty()) {
+                                    item(key = "box_empty") {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                stringResource(R.string.packing_box_empty_hint),
+                                                style = MaterialTheme.typography.body2,
+                                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.45f)
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    items(currentBoxGroups, key = { "box_${it.key}" }) { (_, items) ->
+                                        val product = items.first().product
+                                        val totalQty = items.sumOf { it.quantity }
+                                        CurrentBoxProductCard(
+                                            productName = product.name,
+                                            article = product.article,
+                                            barcode = product.barcode,
+                                            quantity = totalQty
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -380,52 +498,122 @@ private fun PackPhaseBanner(
 }
 
 @Composable
-private fun ScannerDetailItemCard(item: RecommendationDetailItem, isActive: Boolean) {
+private fun ScannerDetailItemCard(
+    item: RecommendationDetailItem,
+    isActive: Boolean,
+    packedQuantity: Int = 0
+) {
     val collected = item.collectedQuantity ?: 0
-    val isDone = collected >= item.requestedQuantity
-    val alpha = if (isActive || isDone) 1f else 0.65f
+    val requested = item.requestedQuantity
+    val isPackingDone = packedQuantity >= requested
+    val isCollectedDone = collected >= requested
+    val alpha = if (isActive || isPackingDone) 1f else 0.65f
 
-    Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp,
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 2.dp,
         shape = RoundedCornerShape(10.dp),
-        backgroundColor = if (isDone) Color(0xFFE8F5E9) else MaterialTheme.colors.surface) {
+        backgroundColor = if (isPackingDone) Color(0xFFE8F5E9) else MaterialTheme.colors.surface
+    ) {
         Column(Modifier.padding(12.dp)) {
+            // ── Header row ────────────────────────────────────────────────────
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(item.product.name, style = MaterialTheme.typography.subtitle1,
+                    Text(
+                        item.product.name,
+                        style = MaterialTheme.typography.subtitle1,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha))
-                    Text("Арт: ${item.product.article}", style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f))
-                    Text("Штрихкод: ${item.product.barcode}", style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f))
+                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
+                    )
+                    Text(
+                        stringResource(R.string.item_article_label, item.product.article),
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
+                    )
+                    Text(
+                        stringResource(R.string.item_barcode_label, item.product.barcode),
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = alpha * 0.6f)
+                    )
                 }
                 Spacer(Modifier.width(8.dp))
-                Column(horizontalAlignment = Alignment.End) {
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text("$collected", style = MaterialTheme.typography.h6,
-                            fontWeight = FontWeight.Bold,
-                            color = when {
-                                isDone -> Color(0xFF4CAF50)
-                                isActive -> MaterialTheme.colors.primary
-                                else -> MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
-                            })
-                        Text("/${item.requestedQuantity}", style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
-                    }
-                    Text("шт.", style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f))
-                }
-                if (isDone) {
-                    Spacer(Modifier.width(4.dp))
-                    Icon(Icons.Default.CheckCircle, null,
-                        tint = Color(0xFF4CAF50), modifier = Modifier.size(22.dp))
+                if (isPackingDone) {
+                    Icon(
+                        Icons.Default.CheckCircle, null,
+                        tint = Color(0xFF4CAF50), modifier = Modifier.size(22.dp)
+                    )
                 }
             }
+
+            Spacer(Modifier.height(8.dp))
+
+            // ── Collected row ─────────────────────────────────────────────────
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Default.Inventory2, null,
+                    tint = if (isCollectedDone) Color(0xFF4CAF50)
+                    else MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.packing_collected_label),
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.item_qty_of_display, collected, requested),
+                    style = MaterialTheme.typography.caption,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isCollectedDone) Color(0xFF4CAF50)
+                    else MaterialTheme.colors.onSurface.copy(alpha = alpha)
+                )
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // ── Packed row ────────────────────────────────────────────────────
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Default.MoveToInbox, null,
+                    tint = if (isPackingDone) Color(0xFF4CAF50)
+                    else if (isActive) MaterialTheme.colors.primary
+                    else MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.packing_packed_label),
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.item_qty_of_display, packedQuantity, requested),
+                    style = MaterialTheme.typography.caption,
+                    fontWeight = FontWeight.Bold,
+                    color = when {
+                        isPackingDone -> Color(0xFF4CAF50)
+                        isActive -> MaterialTheme.colors.primary
+                        else -> MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                    }
+                )
+            }
+
             Spacer(Modifier.height(6.dp))
+
+            // ── Progress bar (based on packed quantity) ───────────────────────
             LinearProgressIndicator(
-                progress = (collected.toFloat() / item.requestedQuantity.toFloat()).coerceIn(0f, 1f),
+                progress = (packedQuantity.toFloat() / requested.toFloat()).coerceIn(0f, 1f),
                 modifier = Modifier.fillMaxWidth(),
-                color = if (isDone) Color(0xFF4CAF50) else MaterialTheme.colors.primary,
+                color = if (isPackingDone) Color(0xFF4CAF50) else MaterialTheme.colors.primary,
                 backgroundColor = MaterialTheme.colors.onSurface.copy(alpha = 0.1f)
             )
         }
@@ -433,25 +621,59 @@ private fun ScannerDetailItemCard(item: RecommendationDetailItem, isActive: Bool
 }
 
 @Composable
-private fun ScannerPackedItemRow(item: PackItem) {
-    Card(modifier = Modifier.fillMaxWidth(), elevation = 1.dp,
-        shape = RoundedCornerShape(8.dp), backgroundColor = Color(0xFFF1F8E9)) {
-        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF4CAF50),
-                modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(item.product.name, style = MaterialTheme.typography.body2,
-                modifier = Modifier.weight(1f))
-            Surface(shape = RoundedCornerShape(4.dp),
-                color = Color(0xFF388E3C).copy(alpha = 0.15f)) {
-                Text(item.boxCode, style = MaterialTheme.typography.caption,
-                    fontWeight = FontWeight.Bold, color = Color(0xFF388E3C),
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+private fun CurrentBoxProductCard(
+    productName: String,
+    article: String,
+    barcode: String,
+    quantity: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 3.dp,
+        shape = RoundedCornerShape(10.dp),
+        backgroundColor = Color(0xFFF1F8E9)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.CheckCircle, null,
+                tint = Color(0xFF4CAF50),
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    productName,
+                    style = MaterialTheme.typography.subtitle2,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colors.onSurface
+                )
+                Text(
+                    stringResource(R.string.item_article_label, article),
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+                Text(
+                    stringResource(R.string.item_barcode_label, barcode),
+                    style = MaterialTheme.typography.caption,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
             }
-            Spacer(Modifier.width(6.dp))
-            Text("×${item.quantity}", style = MaterialTheme.typography.caption,
-                fontWeight = FontWeight.Bold, color = Color(0xFF388E3C))
+            Spacer(Modifier.width(8.dp))
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = Color(0xFF388E3C)
+            ) {
+                Text(
+                    stringResource(R.string.packing_in_box_qty, quantity),
+                    style = MaterialTheme.typography.subtitle1,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
         }
     }
 }

@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.proffi.inventory.R
-import io.proffi.inventory.network.PackItem
 import io.proffi.inventory.network.RecommendationDetail
 import io.proffi.inventory.network.RecommendationDetailItem
 import io.proffi.inventory.ui.base.BaseActivity
@@ -184,17 +183,76 @@ private fun PackingDetailContent(
             PackingDetailItemCard(item)
         }
 
-        // ── Packed items section ──────────────────────────────────────────────
+        // ── Packed items section — grouped by box, then by barcode ───────────
         if (packItems.isNotEmpty()) {
             item {
                 Spacer(Modifier.height(4.dp))
-                Text(stringResource(R.string.packing_packed_items_title, packItems.size),
+                Text(
+                    stringResource(R.string.packing_packed_items_title, packItems.size),
                     style = MaterialTheme.typography.subtitle2,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF388E3C))
+                    color = Color(0xFF388E3C)
+                )
             }
-            items(packItems) { packItem ->
-                PackedItemCard(packItem)
+
+            val byBox = packItems.groupBy { it.boxCode }
+            byBox.entries.forEachIndexed { boxIndex, (boxCode, boxItems) ->
+                // ── Box divider header ────────────────────────────────────────
+                item(key = "box_header_$boxCode") {
+                    Spacer(Modifier.height(if (boxIndex == 0) 4.dp else 12.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Divider(
+                            modifier = Modifier.weight(1f),
+                            color = Color(0xFF388E3C).copy(alpha = 0.3f)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = Color(0xFF388E3C)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Inventory2, null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    stringResource(R.string.packing_box_label, boxCode),
+                                    style = MaterialTheme.typography.caption,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Divider(
+                            modifier = Modifier.weight(1f),
+                            color = Color(0xFF388E3C).copy(alpha = 0.3f)
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                }
+
+                // ── Items grouped by product (barcode) ────────────────────────
+                val productGroups = boxItems.groupBy { it.product.id }
+                productGroups.forEach { (productId, groupItems) ->
+                    item(key = "item_${boxCode}_$productId") {
+                        val product = groupItems.first().product
+                        val totalQty = groupItems.sumOf { it.quantity }
+                        PackedGroupedItemRow(
+                            productName = product.name,
+                            barcode = product.barcode,
+                            quantity = totalQty
+                        )
+                    }
+                }
             }
         }
     }
@@ -212,9 +270,11 @@ private fun PackingDetailItemCard(item: RecommendationDetailItem) {
             Column(Modifier.weight(1f)) {
                 Text(item.product.name, style = MaterialTheme.typography.subtitle2,
                     fontWeight = FontWeight.SemiBold)
-                Text("Арт: ${item.product.article}", style = MaterialTheme.typography.caption,
+                Text(stringResource(R.string.item_article_label, item.product.article),
+                    style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
-                Text("Штрихкод: ${item.product.barcode}", style = MaterialTheme.typography.caption,
+                Text(stringResource(R.string.item_barcode_label, item.product.barcode),
+                    style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
             }
             Spacer(Modifier.width(8.dp))
@@ -226,7 +286,8 @@ private fun PackingDetailItemCard(item: RecommendationDetailItem) {
                     Text("/${item.requestedQuantity}", style = MaterialTheme.typography.body2,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
                 }
-                Text("шт.", style = MaterialTheme.typography.caption,
+                Text(stringResource(R.string.item_quantity_unit),
+                    style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f))
             }
             if (isDone) {
@@ -239,34 +300,38 @@ private fun PackingDetailItemCard(item: RecommendationDetailItem) {
 }
 
 @Composable
-private fun PackedItemCard(item: PackItem) {
-    Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp,
-        shape = RoundedCornerShape(10.dp),
-        backgroundColor = Color(0xFFF1F8E9)) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Inventory2, null, tint = Color(0xFF388E3C),
-                modifier = Modifier.size(20.dp))
+private fun PackedGroupedItemRow(
+    productName: String,
+    barcode: String,
+    quantity: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = 1.dp,
+        shape = RoundedCornerShape(8.dp),
+        backgroundColor = Color(0xFFF1F8E9)
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Default.CheckCircle, null,
+                tint = Color(0xFF4CAF50), modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
-                Text(item.product.name, style = MaterialTheme.typography.subtitle2,
+                Text(productName, style = MaterialTheme.typography.body2,
                     fontWeight = FontWeight.Medium)
-                Text("Штрихкод: ${item.itemBarcode}", style = MaterialTheme.typography.caption,
+                Text(stringResource(R.string.item_barcode_label, barcode),
+                    style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
             }
             Spacer(Modifier.width(8.dp))
-            Surface(shape = RoundedCornerShape(8.dp),
-                color = Color(0xFF388E3C).copy(alpha = 0.15f)) {
-                Text(
-                    text = stringResource(R.string.packing_box_label, item.boxCode),
-                    style = MaterialTheme.typography.caption,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF388E3C),
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                )
-            }
-            Spacer(Modifier.width(6.dp))
-            Text("×${item.quantity}", style = MaterialTheme.typography.body2,
-                fontWeight = FontWeight.Bold, color = Color(0xFF388E3C))
+            Text(
+                stringResource(R.string.packing_in_box_qty, quantity),
+                style = MaterialTheme.typography.body2,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF388E3C)
+            )
         }
     }
 }

@@ -51,7 +51,7 @@ class PackingViewModel(
             val response = result.getOrNull()!!
             totalItems = response.totalItems
             currentPage = page
-            loadedItems.addAll(response.body)
+            loadedItems.addAll(response.body.orEmpty())
             val hasMore = loadedItems.size < totalItems
             _listState.value = PackingListState.Success(loadedItems.toList(), hasMore)
         } else {
@@ -84,6 +84,9 @@ class PackingViewModel(
     private val _packState = MutableStateFlow<PackState>(PackState.Idle)
     val packState: StateFlow<PackState> = _packState
 
+    private val _lastScannedProductId = MutableStateFlow<String?>(null)
+    val lastScannedProductId: StateFlow<String?> = _lastScannedProductId
+
     fun resetPackPhase() {
         _packPhase.value = PackPhase.WaitingForBox
     }
@@ -103,6 +106,23 @@ class PackingViewModel(
         val detail = (_detailState.value as? PackingDetailState.Success)?.detail ?: return
         val trimmed = barcode.trim()
 
+        // Find the detail item by barcode
+        val detailItem = detail.details.find { it.product.barcode == trimmed }
+        if (detailItem == null) {
+            _packState.value = PackState.ProductNotFound
+            return
+        }
+
+        // Check if already fully packed → excess
+        val packItems = detail.packItems ?: emptyList()
+        val alreadyPacked = packItems
+            .filter { it.product.id == detailItem.product.id }
+            .sumOf { it.quantity }
+        if (alreadyPacked >= detailItem.requestedQuantity) {
+            _packState.value = PackState.ExcessProduct(detailItem.product.name)
+            return
+        }
+
         viewModelScope.launch {
             _packState.value = PackState.Loading
             val result = packingRepository.packProduct(
@@ -113,6 +133,7 @@ class PackingViewModel(
             )
             if (result.isSuccess) {
                 val updated = result.getOrNull()!!
+                _lastScannedProductId.value = detailItem.product.id
                 _detailState.value = PackingDetailState.Success(updated)
                 _packState.value = PackState.Success
             } else {
@@ -152,5 +173,7 @@ sealed class PackState {
     object Idle : PackState()
     object Loading : PackState()
     object Success : PackState()
+    object ProductNotFound : PackState()
+    data class ExcessProduct(val productName: String) : PackState()
     data class Error(val message: String) : PackState()
 }

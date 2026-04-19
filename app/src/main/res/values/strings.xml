@@ -201,6 +201,20 @@
     <string name="assembly_empty">Нет доступных рекомендаций</string>
     <string name="assembly_error_loading">Ошибка загрузки: %s</string>
     <string name="assembly_products_count">%d поз. • %d шт.</string>
+    <string name="assembly_excess_title">Лишний товар</string>
+    <string name="assembly_excess_message">Товар «%s» уже собран в необходимом количестве. Данный товар является лишним.</string>
+    <string name="assembly_excess_ok">ОК</string>
+
+    <!-- Item card common labels -->
+    <string name="item_article_label">Арт: %s</string>
+    <string name="item_barcode_label">Штрихкод: %s</string>
+    <string name="item_quantity_unit">шт.</string>
+    <string name="item_qty_of_display">%1$d / %2$d шт.</string>
+    <string name="item_location_label">Местоположение:</string>
+    <string name="item_zone_label">Зона:</string>
+    <string name="item_shelf_label">Стеллаж:</string>
+    <string name="item_box_scan_label">Коробка:</string>
+    <string name="item_location_qty">%d шт.</string>
 
     <!-- Packing Screen -->
     <string name="menu_packing">Упаковка товара</string>
@@ -218,4 +232,12 @@
     <string name="packing_manual_box_hint">Введите код коробки вручную</string>
     <string name="packing_scan_product_prompt">Сканируйте товар • Коробка: %s</string>
     <string name="packing_change_box">Сменить коробку</string>
+    <string name="packing_collected_label">Собрано:</string>
+    <string name="packing_packed_label">Упаковано:</string>
+    <string name="packing_box_empty_hint">Сканируйте товар для добавления в коробку</string>
+    <string name="packing_in_box_qty">×%d шт.</string>
+    <string name="packing_product_not_found">Товар не найден в задании</string>
+    <string name="packing_excess_title">Лишний товар</string>
+    <string name="packing_excess_message">Товар «%s» уже упакован в необходимом количестве. Данный товар является лишним.</string>
+    <string name="packing_excess_ok">ОК</string>
 </resources>

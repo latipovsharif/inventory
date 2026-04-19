@@ -202,6 +202,20 @@
     <string name="assembly_empty">No recommendations available</string>
     <string name="assembly_error_loading">Loading error: %s</string>
     <string name="assembly_products_count">%d pos. • %d pcs.</string>
+    <string name="assembly_excess_title">Excess Product</string>
+    <string name="assembly_excess_message">Product «%s» is already collected in the required quantity. This item is excess.</string>
+    <string name="assembly_excess_ok">OK</string>
+
+    <!-- Item card common labels -->
+    <string name="item_article_label">Art: %s</string>
+    <string name="item_barcode_label">Barcode: %s</string>
+    <string name="item_quantity_unit">pcs.</string>
+    <string name="item_qty_of_display">%1$d / %2$d pcs.</string>
+    <string name="item_location_label">Location:</string>
+    <string name="item_zone_label">Zone:</string>
+    <string name="item_shelf_label">Shelf:</string>
+    <string name="item_box_scan_label">Box:</string>
+    <string name="item_location_qty">%d pcs.</string>
 
     <!-- Packing Screen -->
     <string name="menu_packing">Product Packing</string>
@@ -219,4 +233,12 @@
     <string name="packing_manual_box_hint">Enter box code manually</string>
     <string name="packing_scan_product_prompt">Scan product • Box: %s</string>
     <string name="packing_change_box">Change box</string>
+    <string name="packing_collected_label">Collected:</string>
+    <string name="packing_packed_label">Packed:</string>
+    <string name="packing_box_empty_hint">Scan a product to add to the box</string>
+    <string name="packing_in_box_qty">×%d pcs.</string>
+    <string name="packing_product_not_found">Product not found in task</string>
+    <string name="packing_excess_title">Excess Product</string>
+    <string name="packing_excess_message">Product «%s» is already packed in the required quantity. This item is excess.</string>
+    <string name="packing_excess_ok">OK</string>
 </resources>
