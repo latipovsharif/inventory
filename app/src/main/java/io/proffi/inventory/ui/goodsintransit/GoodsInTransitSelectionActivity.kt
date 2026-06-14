@@ -53,7 +53,6 @@ class GoodsInTransitSelectionActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         // Освежить список при возврате со скан-экрана (документ мог быть завершён/отменён)
-        (warehouseViewModel.warehousesState.value as? WarehousesState.Success)
         gitViewModel.selectedWarehouseId?.let { gitViewModel.loadDocuments(it) }
     }
 }
