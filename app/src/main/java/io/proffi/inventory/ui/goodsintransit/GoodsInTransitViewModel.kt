@@ -17,6 +17,9 @@ class GoodsInTransitViewModel(
     private val _listState = MutableStateFlow<GitListState>(GitListState.Loading)
     val listState: StateFlow<GitListState> = _listState
 
+    /** Склад, выбранный на экране выбора (для refresh в onResume). */
+    var selectedWarehouseId: String? = null
+
     fun loadDocuments(warehouseId: String) {
         viewModelScope.launch {
             _listState.value = GitListState.Loading
