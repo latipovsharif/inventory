@@ -241,4 +241,38 @@
     <string name="packing_excess_title">Excess Product</string>
     <string name="packing_excess_message">Product «%s» is already packed in the required quantity. This item is excess.</string>
     <string name="packing_excess_ok">OK</string>
+
+    <!-- Goods-in-transit -->
+    <string name="menu_goods_in_transit">Goods in transit</string>
+    <string name="git_title">Goods in transit receiving</string>
+    <string name="git_select_warehouse">Select a warehouse</string>
+    <string name="git_warehouse">Warehouse</string>
+    <string name="git_select">Select warehouse</string>
+    <string name="git_view_documents">Show documents</string>
+    <string name="git_empty">No documents in transit</string>
+    <string name="git_error_loading">Loading error: %1$s</string>
+    <string name="git_doc_number_label">Document: %1$s</string>
+    <string name="git_external_number_label">External no.: %1$s</string>
+    <string name="git_progress_label">Received %1$s of %2$s</string>
+    <string name="git_status_in_transit">In transit</string>
+    <string name="git_status_receiving">Receiving</string>
+    <string name="git_scan_cell_prompt">Scan a cell</string>
+    <string name="git_manual_cell_hint">Cell code</string>
+    <string name="git_scan_product_prompt">Cell %1$s — scan product</string>
+    <string name="git_change_cell">Change cell</string>
+    <string name="git_manual_barcode_hint">Product barcode</string>
+    <string name="git_qty_hint">Qty</string>
+    <string name="git_add">Add</string>
+    <string name="git_product_not_found">Product is not in this document</string>
+    <string name="git_scan_success">%1$s: +%2$s</string>
+    <string name="git_ordered_label">Ordered</string>
+    <string name="git_received_label">Received</string>
+    <string name="git_finalize">Finish receiving</string>
+    <string name="git_cancel_doc">Cancel document</string>
+    <string name="git_finalize_confirm_title">Finish receiving?</string>
+    <string name="git_finalize_confirm_message">Goods will be posted to stock and distributed into cells. Discrepancies go to the act.</string>
+    <string name="git_finalize_done">Receiving finished</string>
+    <string name="git_cancel_done">Document cancelled</string>
+    <string name="git_confirm_yes">Yes</string>
+    <string name="git_confirm_no">No</string>
 </resources>
