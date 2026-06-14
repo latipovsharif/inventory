@@ -66,6 +66,9 @@ class MainActivity : BaseActivity() {
                         // Открыть экран упаковки товара
                         startActivity(Intent(activity, io.proffi.inventory.ui.packing.PackingListActivity::class.java))
                     },
+                    onGoodsInTransitClick = {
+                        startActivity(Intent(activity, io.proffi.inventory.ui.goodsintransit.GoodsInTransitSelectionActivity::class.java))
+                    },
                     onSettingsClick = {
                         // Открыть экран настроек
                         startActivity(Intent(activity, io.proffi.inventory.ui.settings.SettingsActivity::class.java))
@@ -85,6 +88,7 @@ fun MainScreen(
     onProductReceiveClick: () -> Unit,
     onAssemblyClick: () -> Unit,
     onPackingClick: () -> Unit,
+    onGoodsInTransitClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -127,6 +131,10 @@ fun MainScreen(
                 onPackingClick = {
                     scope.launch { scaffoldState.drawerState.close() }
                     onPackingClick()
+                },
+                onGoodsInTransitClick = {
+                    scope.launch { scaffoldState.drawerState.close() }
+                    onGoodsInTransitClick()
                 },
                 onSettingsClick = {
                     scope.launch { scaffoldState.drawerState.close() }
@@ -226,6 +234,7 @@ fun DrawerContent(
     onProductReceiveClick: () -> Unit,
     onAssemblyClick: () -> Unit,
     onPackingClick: () -> Unit,
+    onGoodsInTransitClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onLogout: () -> Unit
 ) {
@@ -300,6 +309,13 @@ fun DrawerContent(
             icon = Icons.Default.MoveToInbox,
             text = stringResource(R.string.menu_packing),
             onClick = onPackingClick
+        )
+
+        // Пункт меню: Приход в пути
+        DrawerMenuItem(
+            icon = Icons.Default.LocalShipping,
+            text = stringResource(R.string.menu_goods_in_transit),
+            onClick = onGoodsInTransitClick
         )
 
         // Пункт меню: Склады
