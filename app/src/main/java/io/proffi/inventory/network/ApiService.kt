@@ -83,6 +83,28 @@ interface ApiService {
         @Path("id") id: String,
         @Body request: PackProductRequest
     ): RecommendationDetail
+
+    // Goods-in-transit (товар в пути) endpoints
+    @GET("api/v1/documents/goods-in-transit/")
+    suspend fun getGoodsInTransit(
+        @Query("warehouse_id") warehouseId: String,
+        @Query("page") page: Int = 1
+    ): GitListResponse
+
+    @GET("api/v1/documents/goods-in-transit/{id}/")
+    suspend fun getGoodsInTransitDetail(@Path("id") id: String): GitDetailResponse
+
+    @POST("api/v1/documents/goods-in-transit/{id}/scan/")
+    suspend fun scanGoodsInTransit(
+        @Path("id") id: String,
+        @Body request: GitScanRequest
+    ): GitScanResponse
+
+    @POST("api/v1/documents/goods-in-transit/{id}/finalize/")
+    suspend fun finalizeGoodsInTransit(@Path("id") id: String): GitActionResponse
+
+    @POST("api/v1/documents/goods-in-transit/{id}/cancel/")
+    suspend fun cancelGoodsInTransit(@Path("id") id: String): GitActionResponse
 }
 
 // Request/Response models
@@ -478,5 +500,75 @@ data class CollectRequest(
     @SerializedName("product_id")
     val productId: String,
     val quantity: Double
+)
+
+// Goods-in-transit models
+data class GitListResponse(
+    @SerializedName("page_count") val pageCount: Int,
+    @SerializedName("total_items") val totalItems: Int,
+    @SerializedName("item_per_page") val itemPerPage: Int,
+    val body: List<GitDocument>? = null
+)
+
+data class GitDocument(
+    val id: String,
+    @SerializedName("document_number") val documentNumber: String,
+    @SerializedName("external_document_number") val externalDocumentNumber: String,
+    @SerializedName("warehouse_id") val warehouseId: String,
+    val status: String,
+    @SerializedName("line_count") val lineCount: Int,
+    @SerializedName("ordered_total") val orderedTotal: Double,
+    @SerializedName("received_total") val receivedTotal: Double
+)
+
+data class GitDetailResponse(
+    val id: String,
+    @SerializedName("external_document_number") val externalDocumentNumber: String,
+    @SerializedName("warehouse_id") val warehouseId: String,
+    val status: String,
+    @SerializedName("receipt_document_base_id") val receiptDocumentBaseId: String?,
+    val details: List<GitDetailLine>? = null,
+    val scans: List<GitScanLine>? = null
+)
+
+data class GitDetailLine(
+    @SerializedName("product_id") val productId: String,
+    @SerializedName("product_name") val productName: String,
+    val barcode: String,
+    val article: String,
+    @SerializedName("ordered_quantity") val orderedQuantity: Double,
+    @SerializedName("received_quantity") val receivedQuantity: Double,
+    @SerializedName("invoice_price") val invoicePrice: Double,
+    @SerializedName("sell_price") val sellPrice: Double
+)
+
+data class GitScanLine(
+    @SerializedName("product_id") val productId: String,
+    @SerializedName("product_name") val productName: String,
+    @SerializedName("warehouse_box_id") val warehouseBoxId: String,
+    val quantity: Double
+)
+
+data class GitScanRequest(
+    val barcode: String,
+    @SerializedName("box_code") val boxCode: String,
+    val quantity: Double
+)
+
+data class GitScanResponse(
+    val status: Int,
+    val message: String,
+    val body: GitScanBody?
+)
+
+data class GitScanBody(
+    val barcode: String,
+    @SerializedName("product_name") val productName: String?,
+    val quantity: Double
+)
+
+data class GitActionResponse(
+    val status: Int,
+    val message: String
 )
 
