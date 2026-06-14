@@ -10,6 +10,7 @@ import io.proffi.inventory.ui.packing.PackingViewModel
 import io.proffi.inventory.ui.productmove.ProductMoveViewModel
 import io.proffi.inventory.ui.productreceive.ProductReceiveViewModel
 import io.proffi.inventory.ui.scanner.ScannerViewModel
+import io.proffi.inventory.ui.goodsintransit.GoodsInTransitViewModel
 import io.proffi.inventory.ui.warehouse.WarehouseViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
@@ -30,6 +31,7 @@ val appModule = module {
     single { ProductMoveRepository(get()) }
     single { AssemblyRepository(get()) }
     single { PackingRepository(get()) }
+    single { GoodsInTransitRepository(get()) }
 
     // ViewModels
     viewModelOf(::LoginViewModel)
@@ -40,4 +42,5 @@ val appModule = module {
     viewModelOf(::ProductReceiveViewModel)
     viewModelOf(::AssemblyViewModel)
     viewModelOf(::PackingViewModel)
+    viewModelOf(::GoodsInTransitViewModel)
 }
