@@ -240,4 +240,38 @@
     <string name="packing_excess_title">Лишний товар</string>
     <string name="packing_excess_message">Товар «%s» уже упакован в необходимом количестве. Данный товар является лишним.</string>
     <string name="packing_excess_ok">ОК</string>
+
+    <!-- Goods-in-transit (приход товара в пути) -->
+    <string name="menu_goods_in_transit">Приход в пути</string>
+    <string name="git_title">Приход товара в пути</string>
+    <string name="git_select_warehouse">Выберите склад</string>
+    <string name="git_warehouse">Склад</string>
+    <string name="git_select">Выбрать склад</string>
+    <string name="git_view_documents">Показать документы</string>
+    <string name="git_empty">Нет документов в пути</string>
+    <string name="git_error_loading">Ошибка загрузки: %1$s</string>
+    <string name="git_doc_number_label">Документ: %1$s</string>
+    <string name="git_external_number_label">Внешний №: %1$s</string>
+    <string name="git_progress_label">Принято %1$s из %2$s</string>
+    <string name="git_status_in_transit">В пути</string>
+    <string name="git_status_receiving">Приёмка</string>
+    <string name="git_scan_cell_prompt">Отсканируйте ячейку</string>
+    <string name="git_manual_cell_hint">Код ячейки</string>
+    <string name="git_scan_product_prompt">Ячейка %1$s — сканируйте товар</string>
+    <string name="git_change_cell">Сменить ячейку</string>
+    <string name="git_manual_barcode_hint">Штрихкод товара</string>
+    <string name="git_qty_hint">Кол-во</string>
+    <string name="git_add">Добавить</string>
+    <string name="git_product_not_found">Товар не в этом документе</string>
+    <string name="git_scan_success">%1$s: +%2$s</string>
+    <string name="git_ordered_label">Заказано</string>
+    <string name="git_received_label">Принято</string>
+    <string name="git_finalize">Завершить приёмку</string>
+    <string name="git_cancel_doc">Отменить документ</string>
+    <string name="git_finalize_confirm_title">Завершить приёмку?</string>
+    <string name="git_finalize_confirm_message">Товар будет оприходован на склад и разложен по ячейкам. Расхождения попадут в акт.</string>
+    <string name="git_finalize_done">Приёмка завершена</string>
+    <string name="git_cancel_done">Документ отменён</string>
+    <string name="git_confirm_yes">Да</string>
+    <string name="git_confirm_no">Нет</string>
 </resources>
