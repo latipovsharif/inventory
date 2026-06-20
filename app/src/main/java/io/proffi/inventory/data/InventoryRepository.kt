@@ -7,7 +7,7 @@ import java.util.*
 class InventoryRepository(private val apiService: ApiService) {
 
     suspend fun getOpenInventories(warehouseId: String): Result<List<Inventory>> =
-        safeApiCall(retries = 2) { apiService.getOpenInventories(warehouseId).body }
+        safeApiCall(retries = 2) { apiService.getOpenInventories(warehouseId).body.orEmpty() }
 
     suspend fun startInventory(warehouseId: String): Result<String> {
         // Текущая дата в ISO 8601: "2026-01-21T10:30:00Z"
@@ -46,10 +46,11 @@ class InventoryRepository(private val apiService: ApiService) {
         safeApiCall {
             // Сначала читаем текущее количество для отправки previous_actual_quantity.
             val detailsResponse = apiService.getInventoryItemDetails(inventoryId, barcode)
-            if (detailsResponse.body.isEmpty()) {
+            val details = detailsResponse.body.orEmpty()
+            if (details.isEmpty()) {
                 throw IllegalStateException("Product not found in inventory")
             }
-            val itemDetail = detailsResponse.body[0]
+            val itemDetail = details[0]
             apiService.updateInventoryItem(
                 inventoryId = inventoryId,
                 request = listOf(

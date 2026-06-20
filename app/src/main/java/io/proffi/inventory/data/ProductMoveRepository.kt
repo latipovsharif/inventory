@@ -7,7 +7,7 @@ import java.util.*
 class ProductMoveRepository(private val apiService: ApiService) {
 
     suspend fun getActiveProductMoves(): Result<List<ProductMove>> =
-        safeApiCall(retries = 2) { apiService.getActiveProductMoves().body }
+        safeApiCall(retries = 2) { apiService.getActiveProductMoves().body.orEmpty() }
 
     suspend fun startProductMove(fromWarehouseId: String, toWarehouseId: String): Result<String> {
         if (fromWarehouseId == toWarehouseId) {
@@ -49,7 +49,7 @@ class ProductMoveRepository(private val apiService: ApiService) {
 
     // Receive functions
     suspend fun getIncomingProductMoves(warehouseId: String): Result<List<ProductMove>> =
-        safeApiCall(retries = 2) { apiService.getIncomingProductMoves(warehouseId).body }
+        safeApiCall(retries = 2) { apiService.getIncomingProductMoves(warehouseId).body.orEmpty() }
 
     suspend fun scanProductForReceive(moveId: String, barcode: String, quantity: Double): Result<ScanProductMoveResponse> =
         safeApiCall {

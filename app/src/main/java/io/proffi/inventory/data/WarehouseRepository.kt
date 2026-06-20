@@ -6,5 +6,5 @@ import io.proffi.inventory.network.safeApiCall
 class WarehouseRepository(private val apiService: ApiService) {
 
     suspend fun getWarehouses(): Result<List<Warehouse>> =
-        safeApiCall(retries = 2) { apiService.getWarehouses().body }
+        safeApiCall(retries = 2) { apiService.getWarehouses().body.orEmpty() }
 }

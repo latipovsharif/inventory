@@ -146,7 +146,7 @@ data class WarehousesResponse(
     val totalItems: Int,
     @SerializedName("item_per_page")
     val itemPerPage: Int,
-    val body: List<Warehouse>
+    val body: List<Warehouse>? = null
 )
 
 data class Warehouse(
@@ -196,7 +196,7 @@ data class InventoryListResponse(
     val totalItems: Int,
     @SerializedName("item_per_page")
     val itemPerPage: Int,
-    val body: List<Inventory>
+    val body: List<Inventory>? = null
 )
 
 data class Inventory(
@@ -235,7 +235,7 @@ data class InventoryItemDetailsResponse(
     val totalItems: Int,
     @SerializedName("item_per_page")
     val itemPerPage: Int,
-    val body: List<InventoryItemDetail>
+    val body: List<InventoryItemDetail>? = null
 )
 
 data class InventoryItemDetail(
@@ -353,7 +353,7 @@ data class ProductMoveListResponse(
     val totalItems: Int,
     @SerializedName("item_per_page")
     val itemPerPage: Int,
-    val body: List<ProductMove>
+    val body: List<ProductMove>? = null
 )
 
 data class ProductMove(
