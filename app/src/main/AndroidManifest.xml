@@ -23,7 +23,6 @@
         <activity
             android:name="io.proffi.inventory.ui.splash.SplashActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.MyApplication.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,94 +32,75 @@
 
         <activity
             android:name="io.proffi.inventory.ui.login.LoginActivity"
-            android:exported="false"
-            android:screenOrientation="portrait">
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.main.MainActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.settings.SettingsActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.warehouse.WarehouseActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.inventory.InventoryActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.scanner.ScannerActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.productmove.ProductMoveSelectionActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.productmove.ProductMoveScannerActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.productreceive.ProductReceiveSelectionActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.productreceive.ProductReceiveScannerActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.goodsintransit.GoodsInTransitSelectionActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.goodsintransit.GoodsInTransitScannerActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.assembly.AssemblyListActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.assembly.AssemblyDetailActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.assembly.AssemblyScannerActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.packing.PackingListActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.packing.PackingDetailActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="io.proffi.inventory.ui.packing.PackingScannerActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
