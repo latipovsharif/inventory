@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import io.proffi.inventory.data.AssemblyRepository
 import io.proffi.inventory.network.Recommendation
 import io.proffi.inventory.network.RecommendationDetail
+import io.proffi.inventory.util.ScanDebouncer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -51,8 +52,11 @@ class AssemblyViewModel(
             val response = result.getOrNull()!!
             totalItems = response.totalItems
             currentPage = page
-            loadedItems.addAll(response.body.orEmpty())
-            val hasMore = loadedItems.size < totalItems
+            val pageItems = response.body.orEmpty()
+            loadedItems.addAll(pageItems)
+            // Use the server's page_count as the authoritative "more pages" signal;
+            // also stop if a page came back empty so we can't loop forever.
+            val hasMore = pageItems.isNotEmpty() && page < response.pageCount
             _recommendationsState.value = RecommendationsState.Success(loadedItems.toList(), hasMore)
         } else {
             _recommendationsState.value = RecommendationsState.Error(
@@ -87,8 +91,11 @@ class AssemblyViewModel(
     private val _lastScannedProductId = MutableStateFlow<String?>(null)
     val lastScannedProductId: StateFlow<String?> = _lastScannedProductId
 
+    private val scanDebouncer = ScanDebouncer()
+
     fun resetScanPhase() {
         _scanPhase.value = ScanPhase.WaitingForBox
+        scanDebouncer.reset()
     }
 
     /** Called for EVERY scan in WaitingForBox phase – and also when a new box is scanned
@@ -119,7 +126,12 @@ class AssemblyViewModel(
     fun onProductScanned(barcode: String) {
         val phase = _scanPhase.value as? ScanPhase.BoxScanned ?: return
         val detail = (_detailState.value as? DetailState.Success)?.detail ?: return
-        val detailItem = detail.details.find { it.product.barcode == barcode }
+        // Ignore scans while a collect is in flight (prevents double-count) and
+        // drop duplicate hardware fires of the same barcode.
+        if (_collectState.value is CollectState.Loading) return
+        val trimmed = barcode.trim()
+        if (scanDebouncer.isDuplicate(trimmed)) return
+        val detailItem = detail.details.find { it.product.barcode == trimmed }
         if (detailItem == null) {
             _collectState.value = CollectState.ProductNotFound
             return

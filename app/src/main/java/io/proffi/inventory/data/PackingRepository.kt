@@ -4,38 +4,28 @@ import io.proffi.inventory.network.ApiService
 import io.proffi.inventory.network.PackProductRequest
 import io.proffi.inventory.network.RecommendationDetail
 import io.proffi.inventory.network.RecommendationsListResponse
+import io.proffi.inventory.network.safeApiCall
 
 class PackingRepository(private val apiService: ApiService) {
 
     suspend fun getPackingRecommendations(
         page: Int,
         status: String = "packaging"
-    ): Result<RecommendationsListResponse> {
-        return try {
-            val response = apiService.getRecommendationsFiltered(page, status)
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    ): Result<RecommendationsListResponse> =
+        safeApiCall(retries = 2) { apiService.getRecommendationsFiltered(page, status) }
 
-    suspend fun getRecommendationDetail(id: String): Result<RecommendationDetail> {
-        return try {
-            val response = apiService.getRecommendationDetail(id)
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun getRecommendationDetail(id: String): Result<RecommendationDetail> =
+        safeApiCall(retries = 2) { apiService.getRecommendationDetail(id) }
 
     suspend fun packProduct(
         recommendationId: String,
         boxCode: String,
         barcode: String,
         quantity: Int = 1
-    ): Result<RecommendationDetail> {
-        return try {
-            val response = apiService.packProduct(
+    ): Result<RecommendationDetail> =
+        // No retry: pack mutates state, a retried POST could double-count.
+        safeApiCall {
+            apiService.packProduct(
                 id = recommendationId,
                 request = PackProductRequest(
                     boxCode = boxCode,
@@ -43,9 +33,5 @@ class PackingRepository(private val apiService: ApiService) {
                     quantity = quantity
                 )
             )
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
-    }
 }

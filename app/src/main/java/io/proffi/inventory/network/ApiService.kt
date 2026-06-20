@@ -11,28 +11,29 @@ interface ApiService {
     @POST("api/v1/authorization/refresh/")
     suspend fun refreshToken(@Body refreshRequest: RefreshTokenRequest): LoginResponse
 
-    @GET("api/v1/warehouses/warehouse")
+    @GET("api/v1/warehouses/warehouse/")
     suspend fun getWarehouses(): WarehousesResponse
 
-    @GET("api/v1/warehouses/inventory")
+    @GET("api/v1/warehouses/inventory/")
     suspend fun getOpenInventories(@Query("warehouse_id") warehouseId: String): InventoryListResponse
 
-    @GET("api/v1/warehouses/inventory/{id}/details")
+    @GET("api/v1/warehouses/inventory/{id}/details/")
     suspend fun getInventoryItemDetails(
         @Path("id") inventoryId: String,
         @Query("barcode") barcode: String
     ): InventoryItemDetailsResponse
 
-    @POST("/api/v1/warehouses/inventory")
+    @POST("api/v1/warehouses/inventory/")
     suspend fun startInventory(@Body request: StartInventoryRequest): StartInventoryResponse
 
-    @POST("api/v1/warehouses/inventory/{id}/scan")
+    @POST("api/v1/warehouses/inventory/{id}/scan/")
     suspend fun scanBarcode(@Path("id") inventoryId: String, @Body request: ScanBarcodeRequest): ScanBarcodeResponse
 
-    @PUT("api/v1/warehouses/inventory/{id}/update")
+    @PUT("api/v1/warehouses/inventory/{id}/update/")
     suspend fun updateInventoryItem(@Path("id") inventoryId: String, @Body request: List<UpdateInventoryItemRequest>): UpdateInventoryItemResponse
 
-    @POST("api/inventories/{id}/close")
+    // Backend route is .../inventory/:id/complete/ (there is no "close" endpoint).
+    @POST("api/v1/warehouses/inventory/{id}/complete/")
     suspend fun closeInventory(@Path("id") inventoryId: String): CloseInventoryResponse
 
     // Product Move endpoints
@@ -59,26 +60,26 @@ interface ApiService {
     suspend fun confirmReceiveProductMove(@Path("id") moveId: String): CompleteProductMoveResponse
 
     // Assembly (picking) endpoints
-    @GET("api/v1/warehouses/recommendations")
+    @GET("api/v1/warehouses/recommendations/")
     suspend fun getRecommendations(@Query("page") page: Int): RecommendationsListResponse
 
-    @GET("api/v1/warehouses/recommendations")
+    @GET("api/v1/warehouses/recommendations/")
     suspend fun getRecommendationsFiltered(
         @Query("page") page: Int,
         @Query("status") status: String
     ): RecommendationsListResponse
 
-    @GET("api/v1/warehouses/recommendations/{id}")
+    @GET("api/v1/warehouses/recommendations/{id}/")
     suspend fun getRecommendationDetail(@Path("id") id: String): RecommendationDetail
 
-    @POST("api/v1/warehouses/recommendations/{id}/collect")
+    @POST("api/v1/warehouses/recommendations/{id}/collect/")
     suspend fun collectProduct(
         @Path("id") id: String,
         @Body request: CollectRequest
     ): RecommendationDetail
 
     // Packing endpoint
-    @POST("api/v1/warehouses/recommendations/{id}/pack")
+    @POST("api/v1/warehouses/recommendations/{id}/pack/")
     suspend fun packProduct(
         @Path("id") id: String,
         @Body request: PackProductRequest
@@ -533,9 +534,11 @@ data class GitDetailResponse(
 
 data class GitDetailLine(
     @SerializedName("product_id") val productId: String,
-    @SerializedName("product_name") val productName: String,
-    val barcode: String,
-    val article: String,
+    // Enrichment fields the backend may not send yet — keep nullable to avoid
+    // Gson populating a non-null field with null (which would NPE at use).
+    @SerializedName("product_name") val productName: String? = null,
+    val barcode: String? = null,
+    val article: String? = null,
     @SerializedName("ordered_quantity") val orderedQuantity: Double,
     @SerializedName("received_quantity") val receivedQuantity: Double,
     @SerializedName("invoice_price") val invoicePrice: Double,
@@ -544,7 +547,7 @@ data class GitDetailLine(
 
 data class GitScanLine(
     @SerializedName("product_id") val productId: String,
-    @SerializedName("product_name") val productName: String,
+    @SerializedName("product_name") val productName: String? = null,
     @SerializedName("warehouse_box_id") val warehouseBoxId: String,
     val quantity: Double
 )

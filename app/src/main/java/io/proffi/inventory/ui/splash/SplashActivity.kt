@@ -18,20 +18,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import io.proffi.inventory.R
+import io.proffi.inventory.data.AuthRepository
 import io.proffi.inventory.ui.base.BaseActivity
 import io.proffi.inventory.ui.login.LoginActivity
+import io.proffi.inventory.ui.main.MainActivity
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class SplashActivity : BaseActivity() {
+
+    private val authRepository: AuthRepository by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 SplashScreen {
-                    // Переход к LoginActivity после задержки
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    finish()
+                    // Route to Main if a session exists, otherwise to Login.
+                    lifecycleScope.launch {
+                        val target = if (authRepository.isAuthenticated()) {
+                            MainActivity::class.java
+                        } else {
+                            LoginActivity::class.java
+                        }
+                        startActivity(Intent(this@SplashActivity, target))
+                        finish()
+                    }
                 }
             }
         }
@@ -41,7 +56,7 @@ class SplashActivity : BaseActivity() {
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
     LaunchedEffect(Unit) {
-        delay(1500) // Показываем splash screen 2.5 секунды
+        delay(1500) // Показываем splash screen 1.5 секунды
         onTimeout()
     }
 

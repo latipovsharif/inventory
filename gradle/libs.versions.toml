@@ -18,6 +18,7 @@ coroutines = "1.10.2"
 datastore = "1.2.0"
 koin = "4.1.1"
 navigation = "2.9.6"
+mockk = "1.13.13"
 zxing = "3.5.3"
 zxingEmbedded = "4.3.0"
 
@@ -52,6 +53,10 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 # Coroutines
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+
+# Testing (unit)
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 # DataStore
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

@@ -433,11 +433,11 @@ private fun GitLineCard(line: GitDetailLine) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(line.productName, style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(R.string.item_article_label, line.article),
+                    Text(line.productName ?: line.productId, style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.item_article_label, line.article ?: "—"),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
-                    Text(stringResource(R.string.item_barcode_label, line.barcode),
+                    Text(stringResource(R.string.item_barcode_label, line.barcode ?: "—"),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
                 }

@@ -19,8 +19,8 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
             val result = authRepository.login(email, password)
 
             _loginState.value = if (result.isSuccess) {
-                val response = result.getOrNull()!!
-                LoginState.Success(response.accessToken, response.refreshToken, response.user)
+                // Tokens are already persisted by AuthRepository — don't surface them to the UI.
+                LoginState.Success
             } else {
                 LoginState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }
@@ -35,10 +35,6 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 sealed class LoginState {
     object Empty : LoginState()
     object Loading : LoginState()
-    data class Success(
-        val accessToken: String,
-        val refreshToken: String,
-        val user: io.proffi.inventory.network.User
-    ) : LoginState()
+    object Success : LoginState()
     data class Error(val message: String) : LoginState()
 }

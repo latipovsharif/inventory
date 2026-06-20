@@ -17,13 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import io.proffi.inventory.R
+import io.proffi.inventory.data.AuthRepository
 import io.proffi.inventory.ui.base.BaseActivity
 import io.proffi.inventory.ui.login.LoginActivity
 import io.proffi.inventory.ui.warehouse.WarehouseActivity
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class MainActivity : BaseActivity() {
+
+    private val authRepository: AuthRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +47,16 @@ class MainActivity : BaseActivity() {
                 MaterialTheme {
                 MainScreen(
                     onLogout = {
-                        // Очистить токены и вернуться на экран входа
-                        startActivity(Intent(activity, LoginActivity::class.java))
-                        finish()
+                        // Очистить токены, затем вернуться на экран входа.
+                        lifecycleScope.launch {
+                            authRepository.logout()
+                            val intent = Intent(activity, LoginActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
+                            startActivity(intent)
+                            finish()
+                        }
                     },
                     onInventoryClick = {
                         // Открыть экран выбора склада для инвентаризации

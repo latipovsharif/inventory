@@ -19,3 +19,40 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ---------------------------------------------------------------------------
+# Project keep rules (R8 enabled in release)
+# ---------------------------------------------------------------------------
+
+# Keep generic signatures & annotations needed by Gson/Retrofit reflection.
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
+-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations
+
+# Network DTOs are (de)serialized by Gson via reflection — keep names & fields.
+-keep class io.proffi.inventory.network.** { *; }
+
+# Gson
+-keep class com.google.gson.** { *; }
+-keep class * extends com.google.gson.TypeAdapter
+-dontwarn com.google.gson.**
+
+# Retrofit / OkHttp / Okio (most rules ship as consumer rules; these are safety nets).
+-dontwarn retrofit2.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+
+# Koin
+-dontwarn org.koin.**
+
+# Urovo SDK is provided as a local AAR (compileOnly) / mocked at android.device.*
+-keep class android.device.** { *; }
+-dontwarn android.device.**
+
+# Kotlin coroutines
+-dontwarn kotlinx.coroutines.**

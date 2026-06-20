@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import io.proffi.inventory.data.ProductMoveRepository
 import io.proffi.inventory.network.ProductMove
 import io.proffi.inventory.network.ScanProductMoveResponse
+import io.proffi.inventory.util.ScanDebouncer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -35,6 +36,8 @@ class ProductMoveViewModel(
 
     private val _completeMoveState = MutableStateFlow<CompleteMoveState>(CompleteMoveState.Empty)
     val completeMoveState: StateFlow<CompleteMoveState> = _completeMoveState
+
+    private val scanDebouncer = ScanDebouncer()
 
     fun loadActiveProductMoves() {
         viewModelScope.launch {
@@ -70,6 +73,9 @@ class ProductMoveViewModel(
     }
 
     fun scanProduct(moveId: String, barcode: String, quantity: Double) {
+        // Ignore scans while one is in flight + drop duplicate hardware fires.
+        if (_scanState.value is ScanState.Loading) return
+        if (scanDebouncer.isDuplicate(barcode.trim())) return
         viewModelScope.launch {
             _scanState.value = ScanState.Loading
 

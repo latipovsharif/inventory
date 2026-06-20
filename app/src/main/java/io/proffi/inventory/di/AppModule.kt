@@ -2,7 +2,9 @@ package io.proffi.inventory.di
 
 import io.proffi.inventory.data.*
 import io.proffi.inventory.network.AuthInterceptor
+import io.proffi.inventory.network.RefreshApiService
 import io.proffi.inventory.network.RetrofitClient
+import io.proffi.inventory.network.TokenAuthenticator
 import io.proffi.inventory.ui.assembly.AssemblyViewModel
 import io.proffi.inventory.ui.inventory.InventoryViewModel
 import io.proffi.inventory.ui.login.LoginViewModel
@@ -22,7 +24,10 @@ val appModule = module {
 
     // Network
     single { AuthInterceptor(get()) }
-    single { RetrofitClient.create(get()) }
+    // Bare API used only for token refresh (no auth interceptor/authenticator).
+    single { RefreshApiService(RetrofitClient.createAuthApi()) }
+    single { TokenAuthenticator(get(), get()) }
+    single { RetrofitClient.create(get(), get()) }
 
     // Repositories
     single { AuthRepository(get(), get()) }

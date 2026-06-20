@@ -4,6 +4,7 @@ import io.proffi.inventory.network.ApiService
 import io.proffi.inventory.network.LoginRequest
 import io.proffi.inventory.network.LoginResponse
 import io.proffi.inventory.network.RefreshTokenRequest
+import io.proffi.inventory.network.safeApiCall
 import kotlinx.coroutines.flow.first
 
 class AuthRepository(
@@ -11,26 +12,22 @@ class AuthRepository(
     private val tokenManager: TokenManager
 ) {
     suspend fun login(email: String, password: String): Result<LoginResponse> {
-        return try {
-            val response = apiService.login(LoginRequest(email, password))
-            tokenManager.saveTokens(response.accessToken, response.refreshToken)
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
+        val result = safeApiCall { apiService.login(LoginRequest(email, password)) }
+        result.getOrNull()?.let {
+            tokenManager.saveTokens(it.accessToken, it.refreshToken, it.expiresIn)
         }
+        return result
     }
 
     suspend fun refreshToken(): Result<LoginResponse> {
-        return try {
-            val refreshToken = tokenManager.getRefreshToken().first()
-                ?: return Result.failure(Exception("No refresh token available"))
+        val refreshToken = tokenManager.getRefreshToken().first()
+            ?: return Result.failure(Exception("No refresh token available"))
 
-            val response = apiService.refreshToken(RefreshTokenRequest(refreshToken))
-            tokenManager.saveTokens(response.accessToken, response.refreshToken)
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
+        val result = safeApiCall { apiService.refreshToken(RefreshTokenRequest(refreshToken)) }
+        result.getOrNull()?.let {
+            tokenManager.saveTokens(it.accessToken, it.refreshToken, it.expiresIn)
         }
+        return result
     }
 
     suspend fun logout() {
@@ -42,4 +39,3 @@ class AuthRepository(
         return token != null
     }
 }
-

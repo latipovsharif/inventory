@@ -57,7 +57,13 @@ class UrovoScanner(
                 isReceiverRegistered = true
             }
 
-            scanManager?.openScanner()
+            // openScanner() returns false when the real Urovo SDK is absent (the
+            // bundled mock) or the hardware scanner failed to open — surface it.
+            val opened = scanManager?.openScanner() ?: false
+            if (!opened) {
+                callback.onScanError("Аппаратный сканер недоступен. Установите SDK Urovo или выберите камеру в настройках.")
+                return
+            }
             scanManager?.switchOutputMode(0) // 0 = broadcast mode
         } catch (e: Exception) {
             Log.e(TAG, "Error starting Urovo scanner", e)

@@ -29,7 +29,7 @@
     <string name="inventory_id_label">ID: %s</string>
     <string name="inventory_started_label">Started: %s</string>
     <string name="inventory_status_label">Status: %s</string>
-    <string name="inventory_created_by_label">Created by: %s %s</string>
+    <string name="inventory_created_by_label">Created by: %1$s %2$s</string>
 
     <!-- Scanner Screen -->
     <string name="scanner_title">Scanning - %s</string>
@@ -109,7 +109,7 @@
     <string name="scanner_download_ready">Ready to download device library</string>
     <string name="scanner_download_checking">Checking for files…</string>
     <string name="scanner_download_already_downloaded">SDK already downloaded</string>
-    <string name="scanner_download_size">%d MB of %d MB</string>
+    <string name="scanner_download_size">%1$d MB of %2$d MB</string>
     <string name="scanner_download_size_unknown">%d MB downloaded</string>
     <string name="scanner_download_please_wait">Please wait…</string>
     <string name="scanner_download_success">Download complete</string>
@@ -201,7 +201,7 @@
     <string name="assembly_product_not_found">Product not found in task</string>
     <string name="assembly_empty">No recommendations available</string>
     <string name="assembly_error_loading">Loading error: %s</string>
-    <string name="assembly_products_count">%d pos. • %d pcs.</string>
+    <string name="assembly_products_count">%1$d pos. • %2$d pcs.</string>
     <string name="assembly_excess_title">Excess Product</string>
     <string name="assembly_excess_message">Product «%s» is already collected in the required quantity. This item is excess.</string>
     <string name="assembly_excess_ok">OK</string>
@@ -227,7 +227,7 @@
     <string name="packing_error_loading">Loading error: %s</string>
     <string name="packing_items_title">Items (%d)</string>
     <string name="packing_packed_items_title">Packed items (%d)</string>
-    <string name="packing_positions_count">%d pos. • %d pcs.</string>
+    <string name="packing_positions_count">%1$d pos. • %2$d pcs.</string>
     <string name="packing_box_label">Box: %s</string>
     <string name="packing_scan_box_prompt">Scan the packing box</string>
     <string name="packing_manual_box_hint">Enter box code manually</string>

@@ -28,7 +28,7 @@
     <string name="inventory_id_label">ID: %s</string>
     <string name="inventory_started_label">Начата: %s</string>
     <string name="inventory_status_label">Статус: %s</string>
-    <string name="inventory_created_by_label">Создано: %s %s</string>
+    <string name="inventory_created_by_label">Создано: %1$s %2$s</string>
 
     <!-- Scanner Screen -->
     <string name="scanner_title">Сканирование - %s</string>
@@ -108,7 +108,7 @@
     <string name="scanner_download_ready">Готов к загрузке библиотеки устройства</string>
     <string name="scanner_download_checking">Проверка наличия файлов…</string>
     <string name="scanner_download_already_downloaded">SDK уже загружен</string>
-    <string name="scanner_download_size">%d МБ из %d МБ</string>
+    <string name="scanner_download_size">%1$d МБ из %2$d МБ</string>
     <string name="scanner_download_size_unknown">%d МБ загружено</string>
     <string name="scanner_download_please_wait">Пожалуйста, подождите…</string>
     <string name="scanner_download_success">Загрузка завершена</string>
@@ -200,7 +200,7 @@
     <string name="assembly_product_not_found">Товар не найден в задании</string>
     <string name="assembly_empty">Нет доступных рекомендаций</string>
     <string name="assembly_error_loading">Ошибка загрузки: %s</string>
-    <string name="assembly_products_count">%d поз. • %d шт.</string>
+    <string name="assembly_products_count">%1$d поз. • %2$d шт.</string>
     <string name="assembly_excess_title">Лишний товар</string>
     <string name="assembly_excess_message">Товар «%s» уже собран в необходимом количестве. Данный товар является лишним.</string>
     <string name="assembly_excess_ok">ОК</string>
@@ -226,7 +226,7 @@
     <string name="packing_error_loading">Ошибка загрузки: %s</string>
     <string name="packing_items_title">Позиции (%d)</string>
     <string name="packing_packed_items_title">Упакованные товары (%d)</string>
-    <string name="packing_positions_count">%d поз. • %d шт.</string>
+    <string name="packing_positions_count">%1$d поз. • %2$d шт.</string>
     <string name="packing_box_label">Короб: %s</string>
     <string name="packing_scan_box_prompt">Сканируйте коробку для упаковки</string>
     <string name="packing_manual_box_hint">Введите код коробки вручную</string>

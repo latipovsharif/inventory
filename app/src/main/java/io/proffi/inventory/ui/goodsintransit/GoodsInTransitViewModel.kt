@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import io.proffi.inventory.data.GoodsInTransitRepository
 import io.proffi.inventory.network.GitDetailResponse
 import io.proffi.inventory.network.GitDocument
+import io.proffi.inventory.util.ScanDebouncer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -59,8 +60,11 @@ class GoodsInTransitViewModel(
     private val _scanFeedback = MutableStateFlow<GitScanFeedback>(GitScanFeedback.Idle)
     val scanFeedback: StateFlow<GitScanFeedback> = _scanFeedback
 
+    private val scanDebouncer = ScanDebouncer()
+
     fun resetPhase() {
         _scanPhase.value = GitScanPhase.WaitingForCell
+        scanDebouncer.reset()
     }
 
     /** Ячейка выбрана (скан или ручной ввод). */
@@ -76,7 +80,11 @@ class GoodsInTransitViewModel(
     fun onProductScanned(documentId: String, barcode: String, quantity: Double) {
         val phase = _scanPhase.value as? GitScanPhase.CellScanned ?: return
         val detail = (_detailState.value as? GitDetailState.Success)?.detail ?: return
+        // Ignore scans while a scan request is in flight, and drop duplicate
+        // hardware fires of the same barcode (prevents double-count).
+        if (_scanFeedback.value is GitScanFeedback.Loading) return
         val trimmed = barcode.trim()
+        if (scanDebouncer.isDuplicate(trimmed)) return
 
         // Лёгкая клиентская проверка: товар должен быть в документе
         val line = detail.details?.find { it.barcode == trimmed }
@@ -89,7 +97,7 @@ class GoodsInTransitViewModel(
             _scanFeedback.value = GitScanFeedback.Loading
             val result = repository.scan(documentId, trimmed, phase.boxCode, quantity)
             if (result.isSuccess) {
-                val name = result.getOrNull()?.body?.productName ?: line.productName
+                val name = result.getOrNull()?.body?.productName ?: line.productName ?: trimmed
                 _scanFeedback.value = GitScanFeedback.Success(name, quantity)
                 // Обновить прогресс план/факт
                 loadDetail(documentId)
