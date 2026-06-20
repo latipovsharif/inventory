@@ -89,14 +89,6 @@ fun SplashScreen(onTimeout: () -> Unit) {
                 modifier = Modifier.padding(bottom = 40.dp)
             ) {
                 Text(
-                    text = "proffi.io",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF757575),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
                     text = "all rights reserved 2026",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
